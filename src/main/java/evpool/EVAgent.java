@@ -17,12 +17,12 @@ import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 
 
-public class MyAgent extends AbstractParticipant {
+public class EVAgent extends AbstractParticipant {
 
 	Location myLoc;
 	private int size;
 	 
-	MyAgent(UUID id, String name, Location myLoc, int size) {
+	EVAgent(UUID id, String name) {
 		super(id, name);
 		this.myLoc = myLoc;
 		this.size = size;
