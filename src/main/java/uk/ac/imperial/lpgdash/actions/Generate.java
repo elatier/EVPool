@@ -9,8 +9,8 @@ public class Generate extends TimestampedAction {
 	public final double g;
 	public final double q;
 
-	public Generate(Player player, int time) {
-		super(time);
+	public Generate(Player player, int roundNumber) {
+		super(roundNumber);
 		this.player = player;
 		this.g = Random.randomDouble();
 		this.q = this.g + (Random.randomDouble() * (1 - this.g));
@@ -30,7 +30,7 @@ public class Generate extends TimestampedAction {
 
 	@Override
 	public String toString() {
-		return "Generate [player=" + player.getName() + ", g=" + g + ", q=" + q + ", t="
+		return "Generate [player=" + player.getName() + ", g=" + g + ", q=" + q + ", roundNumber="
 				+ t + "]";
 	}
 

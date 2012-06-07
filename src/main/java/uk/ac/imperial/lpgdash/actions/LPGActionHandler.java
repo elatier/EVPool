@@ -11,7 +11,7 @@ import org.drools.runtime.StatefulKnowledgeSession;
 
 import com.google.inject.Inject;
 
-import uk.ac.imperial.lpgdash.LPGService;
+import uk.ac.imperial.evpool.EVPoolService;
 import uk.ac.imperial.lpgdash.facts.Player;
 import uk.ac.imperial.presage2.core.Action;
 import uk.ac.imperial.presage2.core.environment.ActionHandler;
@@ -26,7 +26,7 @@ public class LPGActionHandler implements ActionHandler {
 	final StatefulKnowledgeSession session;
 	Map<UUID, Player> players = new HashMap<UUID, Player>();
 	final EnvironmentServiceProvider serviceProvider;
-	LPGService lpgservice = null;
+	EVPoolService lpgservice = null;
 
 	@Inject
 	public LPGActionHandler(StatefulKnowledgeSession session,
@@ -37,10 +37,10 @@ public class LPGActionHandler implements ActionHandler {
 		this.serviceProvider = serviceProvider;
 	}
 
-	LPGService getLPGService() {
+	EVPoolService getLPGService() {
 		if (this.lpgservice == null) {
 			try {
-				this.lpgservice = serviceProvider.getEnvironmentService(LPGService.class);
+				this.lpgservice = serviceProvider.getEnvironmentService(EVPoolService.class);
 			} catch (UnavailableServiceException e) {
 				logger.warn("Could not get lpg service", e);
 			}

@@ -1,4 +1,4 @@
-package uk.ac.imperial.lpgdash;
+package uk.ac.imperial.evpool;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.drools.runtime.StatefulKnowledgeSession;
 
+import uk.ac.imperial.lpgdash.RoundType;
 import uk.ac.imperial.lpgdash.actions.Generate;
 import uk.ac.imperial.lpgdash.actions.JoinCluster;
 import uk.ac.imperial.lpgdash.actions.LPGActionHandler;
@@ -30,14 +31,14 @@ import uk.ac.imperial.presage2.util.network.NetworkModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 
-public class LPGGameSimulation extends InjectedSimulation implements TimeDriven {
+public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 
 	private final Logger logger = Logger
 			.getLogger("uk.ac.imperial.lpgdash.RuleEngine");
 	private StatefulKnowledgeSession session;
 
 	private Set<Player> players = new HashSet<Player>();
-	private LPGService game;
+	private EVPoolService game;
 
 	@Parameter(name = "cCount")
 	public int cCount;
@@ -59,7 +60,7 @@ public class LPGGameSimulation extends InjectedSimulation implements TimeDriven 
 	@Parameter(name = "seed")
 	public int seed;
 
-	public LPGGameSimulation(Set<AbstractModule> modules) {
+	public EVPoolSimulation(Set<AbstractModule> modules) {
 		super(modules);
 	}
 
@@ -71,7 +72,7 @@ public class LPGGameSimulation extends InjectedSimulation implements TimeDriven 
 	@Inject
 	public void setServiceProvider(EnvironmentServiceProvider serviceProvider) {
 		try {
-			this.game = serviceProvider.getEnvironmentService(LPGService.class);
+			this.game = serviceProvider.getEnvironmentService(EVPoolService.class);
 			LegitimateClaims.game = this.game;
 		} catch (UnavailableServiceException e) {
 			logger.warn("", e);
@@ -83,13 +84,13 @@ public class LPGGameSimulation extends InjectedSimulation implements TimeDriven 
 		Set<AbstractModule> modules = new HashSet<AbstractModule>();
 		modules.add(new AbstractEnvironmentModule()
 				.addActionHandler(LPGActionHandler.class)
-				.addParticipantGlobalEnvironmentService(LPGService.class)
+				.addParticipantGlobalEnvironmentService(EVPoolService.class)
 				.setStorage(RuleStorage.class));
 		modules.add(new RuleModule().addClasspathDrlFile("LPGDash.drl")
-				.addClasspathDrlFile("RationAllocation.drl")
-				.addClasspathDrlFile("RandomAllocation.drl")
-				.addClasspathDrlFile("LegitimateClaimsAllocation.drl")
-				.addStateTranslator(SimParticipantsTranslator.class));
+                //.addClasspathDrlFile("RationAllocation.drl")
+                .addClasspathDrlFile("RandomAllocation.drl")
+                        //.addClasspathDrlFile("LegitimateClaimsAllocation.drl")
+                .addStateTranslator(SimParticipantsTranslator.class));
 		modules.add(NetworkModule.noNetworkModule());
 		return modules;
 	}
@@ -113,7 +114,7 @@ public class LPGGameSimulation extends InjectedSimulation implements TimeDriven 
 		session.insert(c);
 		for (int n = 0; n < cCount; n++) {
 			UUID pid = Random.randomUUID();
-			s.addParticipant(new LPGPlayer(pid, "c" + n, cPCheat, alpha, beta));
+			s.addParticipant(new EVPoolPlayer(pid, "c" + n, cPCheat, alpha, beta));
 			Player p = new Player(pid, "c" + n, "C", alpha, beta);
 			players.add(p);
 			session.insert(p);
@@ -122,7 +123,7 @@ public class LPGGameSimulation extends InjectedSimulation implements TimeDriven 
 		}
 		for (int n = 0; n < ncCount; n++) {
 			UUID pid = Random.randomUUID();
-			s.addParticipant(new LPGPlayer(pid, "nc" + n, ncPCheat, alpha, beta));
+			s.addParticipant(new EVPoolPlayer(pid, "nc" + n, ncPCheat, alpha, beta));
 			Player p = new Player(pid, "nc" + n, "N", alpha, beta);
 			players.add(p);
 			session.insert(p);

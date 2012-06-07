@@ -1,4 +1,4 @@
-package uk.ac.imperial.lpgdash;
+package uk.ac.imperial.evpool;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import org.drools.runtime.ObjectFilter;
 import org.drools.runtime.StatefulKnowledgeSession;
 
+import uk.ac.imperial.lpgdash.RoundType;
 import uk.ac.imperial.lpgdash.facts.Cluster;
 import uk.ac.imperial.lpgdash.facts.MemberOf;
 import uk.ac.imperial.lpgdash.facts.Player;
@@ -24,7 +25,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class LPGService extends EnvironmentService {
+public class EVPoolService extends EnvironmentService {
 
 	private final Logger logger = Logger.getLogger(this.getClass());
 	final StatefulKnowledgeSession session;
@@ -35,8 +36,8 @@ public class LPGService extends EnvironmentService {
 	int roundNumber = 0;
 
 	@Inject
-	protected LPGService(EnvironmentSharedStateAccess sharedState,
-			StatefulKnowledgeSession session, EventBus eb) {
+	protected EVPoolService(EnvironmentSharedStateAccess sharedState,
+                            StatefulKnowledgeSession session, EventBus eb) {
 		super(sharedState);
 		this.session = session;
 		eb.subscribe(this);
@@ -51,7 +52,9 @@ public class LPGService extends EnvironmentService {
 			round = RoundType.DEMAND;
 			session.insert(new Round(++roundNumber, RoundType.DEMAND));
 		}
-		logger.info("Next round: " + round);
+		logger.info("Next round: " + round
+        + " roundNumber=" + roundNumber
+        );
 	}
 
 	@Override

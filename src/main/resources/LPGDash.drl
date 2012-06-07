@@ -78,6 +78,7 @@ rule "Discard Rounds"
 		$r2 : Round( number < $n )
 	then
 		logger.info($r);
+		logger.info("discard:"+$r2);
 		retract( $r2 );
 end
 
@@ -88,6 +89,7 @@ rule "Discard Rounds intermediate"
 		$r2 : Round( number == $n, type == RoundType.DEMAND )
 	then
 		logger.info($r);
+		logger.info("discard intermediate:"+$r2);
 		retract( $r2 );
 end
 
@@ -131,7 +133,7 @@ rule "Accumulate Provisions"
     		setQuantity($pool.getQuantity() + $provision.getQuantity());
     	}
     	insert( new Processed( $provision ) );
-        logger.info( $provision  +" pool is now "+ $pool);
+        logger.info( $provision  +" is now "+ $pool);
 end
 
 rule "Process Demand"
@@ -200,7 +202,7 @@ rule "Join cluster"
 	then
 		insert( new MemberOf( $p, $c ) );
 		insert( new Processed( $j ) );
-		logger.info("Joined cluster: "+ $p );
+		logger.info("Joined "+ $c+ ": "+ $p );
 end
 
 rule "Leave cluster"

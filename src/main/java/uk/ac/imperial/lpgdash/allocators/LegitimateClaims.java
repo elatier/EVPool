@@ -11,7 +11,7 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.drools.runtime.StatefulKnowledgeSession;
 
-import uk.ac.imperial.lpgdash.LPGService;
+import uk.ac.imperial.evpool.EVPoolService;
 import uk.ac.imperial.lpgdash.actions.Allocate;
 import uk.ac.imperial.lpgdash.facts.Allocation;
 import uk.ac.imperial.lpgdash.facts.BordaRank;
@@ -27,7 +27,7 @@ public class LegitimateClaims {
 			.getLogger(LegitimateClaims.class);
 
 	public static StorageService sto = null;
-	public static LPGService game = null;
+	public static EVPoolService game = null;
 
 	private static double[] fixedWeights = { 1, 1, 1, 1, 1, 1, 1 };
 

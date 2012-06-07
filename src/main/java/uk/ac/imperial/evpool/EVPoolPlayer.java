@@ -1,8 +1,9 @@
-package uk.ac.imperial.lpgdash;
+package uk.ac.imperial.evpool;
 
 import java.util.Set;
 import java.util.UUID;
 
+import uk.ac.imperial.lpgdash.RoundType;
 import uk.ac.imperial.lpgdash.actions.Appropriate;
 import uk.ac.imperial.lpgdash.actions.Demand;
 import uk.ac.imperial.lpgdash.actions.LeaveCluster;
@@ -16,7 +17,7 @@ import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.core.util.random.Random;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
-public class LPGPlayer extends AbstractParticipant {
+public class EVPoolPlayer extends AbstractParticipant {
 
 	double g = 0;
 	double q = 0;
@@ -35,13 +36,13 @@ public class LPGPlayer extends AbstractParticipant {
 
 	Cluster cluster = null;
 
-	protected LPGService game;
+	protected EVPoolService game;
 
-	public LPGPlayer(UUID id, String name) {
+	public EVPoolPlayer(UUID id, String name) {
 		super(id, name);
 	}
 
-	public LPGPlayer(UUID id, String name, double pCheat, double alpha, double beta) {
+	public EVPoolPlayer(UUID id, String name, double pCheat, double alpha, double beta) {
 		super(id, name);
 		this.pCheat = pCheat;
 		this.alpha = alpha;
@@ -57,7 +58,7 @@ public class LPGPlayer extends AbstractParticipant {
 	public void initialise() {
 		super.initialise();
 		try {
-			this.game = this.getEnvironmentService(LPGService.class);
+			this.game = this.getEnvironmentService(EVPoolService.class);
 		} catch (UnavailableServiceException e) {
 			logger.warn("Couldn't get environment service", e);
 		}
