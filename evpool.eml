@@ -4,4 +4,5 @@
 	<contentEntry url="file://$MODULE_DIR$">
 		<excludeFolder url="file://$MODULE_DIR$/target"/>
 	</contentEntry>
+	<lib name="Maven: junit:junit:4.8.2" scope="TEST"/>
 </component>

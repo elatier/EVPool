@@ -2,6 +2,7 @@ target/
 
 *.class
 .idea
+.settings
 
 # Package Files #
 *.jar
