@@ -1,4 +1,4 @@
-package uk.ac.imperial.lpgdash.allocators;
+package uk.ac.imperial.evpool.allocators;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.drools.runtime.StatefulKnowledgeSession;
 
-import uk.ac.imperial.lpgdash.actions.Allocate;
-import uk.ac.imperial.lpgdash.facts.Player;
+import uk.ac.imperial.evpool.actions.Allocate;
+import uk.ac.imperial.evpool.facts.Player;
 
 public class RandomAllocator {
 

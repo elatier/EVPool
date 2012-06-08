@@ -1,4 +1,4 @@
-package uk.ac.imperial.lpgdash.allocators;
+package uk.ac.imperial.evpool.allocators;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,12 +12,12 @@ import org.apache.log4j.Logger;
 import org.drools.runtime.StatefulKnowledgeSession;
 
 import uk.ac.imperial.evpool.EVPoolService;
-import uk.ac.imperial.lpgdash.actions.Allocate;
-import uk.ac.imperial.lpgdash.facts.Allocation;
-import uk.ac.imperial.lpgdash.facts.BordaRank;
-import uk.ac.imperial.lpgdash.facts.Cluster;
-import uk.ac.imperial.lpgdash.facts.Player;
-import uk.ac.imperial.lpgdash.facts.PlayerHistory;
+import uk.ac.imperial.evpool.actions.Allocate;
+import uk.ac.imperial.evpool.facts.Allocation;
+import uk.ac.imperial.evpool.facts.BordaRank;
+import uk.ac.imperial.evpool.facts.Cluster;
+import uk.ac.imperial.evpool.facts.Player;
+import uk.ac.imperial.evpool.facts.PlayerHistory;
 import uk.ac.imperial.presage2.core.db.StorageService;
 import uk.ac.imperial.presage2.core.db.persistent.TransientAgentState;
 

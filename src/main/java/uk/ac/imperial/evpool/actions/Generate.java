@@ -1,6 +1,6 @@
-package uk.ac.imperial.lpgdash.actions;
+package uk.ac.imperial.evpool.actions;
 
-import uk.ac.imperial.lpgdash.facts.Player;
+import uk.ac.imperial.evpool.facts.Player;
 import uk.ac.imperial.presage2.core.util.random.Random;
 
 public class Generate extends TimestampedAction {

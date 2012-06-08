@@ -1,6 +1,6 @@
-package uk.ac.imperial.lpgdash.actions;
+package uk.ac.imperial.evpool.actions;
 
-import uk.ac.imperial.lpgdash.facts.Player;
+import uk.ac.imperial.evpool.facts.Player;
 
 public class Appropriate extends PlayerAction {
 

@@ -1,4 +1,4 @@
-package uk.ac.imperial.lpgdash.actions;
+package uk.ac.imperial.evpool.actions;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,7 +12,7 @@ import org.drools.runtime.StatefulKnowledgeSession;
 import com.google.inject.Inject;
 
 import uk.ac.imperial.evpool.EVPoolService;
-import uk.ac.imperial.lpgdash.facts.Player;
+import uk.ac.imperial.evpool.facts.Player;
 import uk.ac.imperial.presage2.core.Action;
 import uk.ac.imperial.presage2.core.environment.ActionHandler;
 import uk.ac.imperial.presage2.core.environment.ActionHandlingException;

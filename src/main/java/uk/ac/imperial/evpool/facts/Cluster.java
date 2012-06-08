@@ -1,4 +1,4 @@
-package uk.ac.imperial.lpgdash.facts;
+package uk.ac.imperial.evpool.facts;
 
 import org.apache.commons.math.stat.descriptive.SummaryStatistics;
 

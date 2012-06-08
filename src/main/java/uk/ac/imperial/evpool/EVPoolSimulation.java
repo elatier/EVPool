@@ -7,13 +7,12 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 import org.drools.runtime.StatefulKnowledgeSession;
 
-import uk.ac.imperial.lpgdash.RoundType;
-import uk.ac.imperial.lpgdash.actions.EVPoolActionHandler;
-import uk.ac.imperial.lpgdash.actions.JoinCluster;
-import uk.ac.imperial.lpgdash.allocators.LegitimateClaims;
-import uk.ac.imperial.lpgdash.facts.Allocation;
-import uk.ac.imperial.lpgdash.facts.Cluster;
-import uk.ac.imperial.lpgdash.facts.Player;
+import uk.ac.imperial.evpool.actions.EVPoolActionHandler;
+import uk.ac.imperial.evpool.actions.JoinCluster;
+import uk.ac.imperial.evpool.allocators.LegitimateClaims;
+import uk.ac.imperial.evpool.facts.Allocation;
+import uk.ac.imperial.evpool.facts.Cluster;
+import uk.ac.imperial.evpool.facts.Player;
 import uk.ac.imperial.presage2.core.TimeDriven;
 import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
@@ -33,7 +32,7 @@ import com.google.inject.Inject;
 public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 
 	private final Logger logger = Logger
-			.getLogger("uk.ac.imperial.lpgdash.RuleEngine");
+			.getLogger("uk.ac.imperial.evpool.RuleEngine");
 	private StatefulKnowledgeSession session;
 
 	private Set<Player> players = new HashSet<Player>();
@@ -82,7 +81,7 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 				.addParticipantGlobalEnvironmentService(EVPoolService.class)
 				.setStorage(RuleStorage.class)
 				 );
-		modules.add(new RuleModule().addClasspathDrlFile("EVPool.drl")
+		modules.add(new RuleModule().addClasspathDrlFile("LPGDash.drl")
                 .addClasspathDrlFile("RationAllocation.drl")
                 .addClasspathDrlFile("RandomAllocation.drl")
                 .addClasspathDrlFile("NeedBasedAllocation.drl")
@@ -124,15 +123,6 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 			session.insert(new JoinCluster(p, c));
 			//session.insert(new Generate(p, game.getRoundNumber() + 1));
 		}
-		/*for (int n = 0; n < ncCount; n++) {
-			UUID pid = Random.randomUUID();
-			s.addParticipant(new EVPoolPlayer(pid, "nc" + n, ncPCheat, alpha, beta));
-			Player p = new Player(pid, "nc" + n, "N", alpha, beta);
-			players.add(p);
-			session.insert(p);
-			session.insert(new JoinCluster(p, c));
-			//session.insert(new Generate(p, game.getRoundNumber() + 1));
-		}*/
 	}
 
 	@Override

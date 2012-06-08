@@ -1,7 +1,7 @@
-package uk.ac.imperial.lpgdash.actions;
+package uk.ac.imperial.evpool.actions;
 
-import uk.ac.imperial.lpgdash.facts.Cluster;
-import uk.ac.imperial.lpgdash.facts.Player;
+import uk.ac.imperial.evpool.facts.Cluster;
+import uk.ac.imperial.evpool.facts.Player;
 
 public class JoinCluster extends PlayerAction {
 	final Cluster cluster;

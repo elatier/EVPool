@@ -1,8 +1,8 @@
-package uk.ac.imperial.lpgdash.allocators;
+package uk.ac.imperial.evpool.allocators;
 
 import org.drools.runtime.StatefulKnowledgeSession;
-import uk.ac.imperial.lpgdash.actions.Allocate;
-import uk.ac.imperial.lpgdash.facts.Player;
+import uk.ac.imperial.evpool.actions.Allocate;
+import uk.ac.imperial.evpool.facts.Player;
 
 import java.util.ArrayList;
 import java.util.Collections;
