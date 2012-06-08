@@ -140,16 +140,19 @@ rule "Process Demand"
 	salience 10
 	when
 		$r : Round( type == RoundType.DEMAND )
-		$d : Demand( this coincides $r, $p : player, $q : quantity )
+		$d : Demand( this coincides $r, $p : player, $q : quantity, $tot : total, $dead :deadline )
 		not( Processed( $d ;) )
 	then
 		modify($p) {
-			setD($q);
+			setD($q),
+			setTotalDemanded($tot),
+			setDeadlineSpecified($dead);
 		}
 		insert( new Processed( $d ) );
 		logger.info($d);
 end
 
+/*
 rule "Set g and q"
 	when
 		$action : Generate( $p : player, $g : g, $q : q)
@@ -161,7 +164,7 @@ rule "Set g and q"
 		}
 		insert( new Processed( $action ) );
 		logger.info($action);
-end
+end*/
 
 rule "Process Allocations"
 	when
@@ -185,7 +188,8 @@ rule "Process Appropriate"
 	then
 		double canTake = Math.min( $pool.getQuantity(), $q );
 		modify($player) {
-			setAppropriated(canTake);
+			setAppropriated(canTake),
+			chargeBattery(canTake);
 		}
 		modify($pool) {
 			setQuantity( $pool.getQuantity() - canTake );
@@ -231,7 +235,7 @@ rule "Assign cluster head"
 		Player randomMember =  (Player) $members.get( Random.randomInt( $members.size() ) );
 		logger.info("New head: "+ randomMember);
 		randomMember.setRole( Role.HEAD );
-		//insert( new IsHead( randomMember, $c ) );
+
 end
 
 rule "Cluster head event"

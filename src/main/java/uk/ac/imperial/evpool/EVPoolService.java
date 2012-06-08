@@ -14,6 +14,7 @@ import uk.ac.imperial.lpgdash.facts.Cluster;
 import uk.ac.imperial.lpgdash.facts.MemberOf;
 import uk.ac.imperial.lpgdash.facts.Player;
 import uk.ac.imperial.lpgdash.facts.Round;
+import uk.ac.imperial.lpgdash.facts.Role;
 import uk.ac.imperial.presage2.core.environment.EnvironmentRegistrationRequest;
 import uk.ac.imperial.presage2.core.environment.EnvironmentService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentSharedStateAccess;
@@ -109,12 +110,16 @@ public class EVPoolService extends EnvironmentService {
 		return roundNumber;
 	}
 
-	public double getG(UUID player) {
-		return getPlayer(player).getG();
+	public double getBatteryCap(UUID player) {
+		return getPlayer(player).getBatterCap();
 	}
 
-	public double getQ(UUID player) {
-		return getPlayer(player).getQ();
+    public Role getRole(UUID player) {
+        return getPlayer(player).getRole();
+    }
+
+	public double getChargeLevel(UUID player) {
+		return getPlayer(player).getChargeLevel();
 	}
 
 	public double getAllocated(UUID player) {

@@ -9,6 +9,7 @@ import uk.ac.imperial.lpgdash.actions.Demand;
 import uk.ac.imperial.lpgdash.actions.LeaveCluster;
 import uk.ac.imperial.lpgdash.actions.Provision;
 import uk.ac.imperial.lpgdash.facts.Cluster;
+import uk.ac.imperial.lpgdash.facts.Role;
 import uk.ac.imperial.presage2.core.db.persistent.TransientAgentState;
 import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
@@ -19,10 +20,16 @@ import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 public class EVPoolPlayer extends AbstractParticipant {
 
-	double g = 0;
-	double q = 0;
-	double d = 0;
-	double p = 0;
+    double batteryCap = 0;   //total units that can be stored int the battery
+    double chargeLevel = 0;  // units of charge int the battery
+    int arrivalRound = 0;
+    int departureRound = 0;
+
+    double p = 0;    //provision
+    double d = 0;    //demanded
+    double total = 0;
+    int deadline = 0;
+
 
 	double a = 2;
 	double b = 1;
@@ -30,8 +37,6 @@ public class EVPoolPlayer extends AbstractParticipant {
 
 	double pCheat = 0.0;
 
-	double alpha = .1;
-	double beta = .1;
 	double satisfaction = 0.5;
 
 	Cluster cluster = null;
@@ -42,11 +47,12 @@ public class EVPoolPlayer extends AbstractParticipant {
 		super(id, name);
 	}
 
-	public EVPoolPlayer(UUID id, String name, double pCheat, double alpha, double beta) {
+	public EVPoolPlayer(UUID id, String name, double pCheat, int arrivalRound, int departureRound) {
 		super(id, name);
 		this.pCheat = pCheat;
-		this.alpha = alpha;
-		this.beta = beta;
+        this.arrivalRound = arrivalRound;
+        this.departureRound = departureRound;
+
 	}
 
 	@Override
@@ -67,8 +73,8 @@ public class EVPoolPlayer extends AbstractParticipant {
 			this.persist.setProperty("a", Double.toString(this.a));
 			this.persist.setProperty("b", Double.toString(this.b));
 			this.persist.setProperty("c", Double.toString(this.c));
-			this.persist.setProperty("alpha", Double.toString(this.alpha));
-			this.persist.setProperty("beta", Double.toString(this.beta));
+			//this.persist.setProperty("alpha", Double.toString(this.alpha));
+			//this.persist.setProperty("beta", Double.toString(this.beta));
 		}
 	}
 
@@ -88,25 +94,43 @@ public class EVPoolPlayer extends AbstractParticipant {
 		}
 
 		if (game.getRound() == RoundType.DEMAND) {
-			if (game.getRoundNumber() > 1) {
-				// determine utility gained from last round
-				calculateScores();
-			}
-			if (this.satisfaction < 0.1 && game.getRoundNumber() % 20 == 0) {
-				leaveCluster();
-			} else {
 
-				// update g and q for this round
-				g = game.getG(getID());
-				q = game.getQ(getID());
+            batteryCap = game.getBatteryCap(getID());
+            chargeLevel = game.getChargeLevel(getID());
+            double totalDemand = batteryCap - chargeLevel;
+
+            if (game.getRoundNumber() > 1) {
+				// determine utility gained from last round
+				//calculateScores();
+			}
+			//if (this.satisfaction < 0.1 && game.getRoundNumber() % 20 == 0)
+			if ( game.getRoundNumber() == departureRound) {
+
+				if (totalDemand > 0.0) {
+                    leaveCluster();
+                    logger.info("Player " + this + " not charged at deadline: " + totalDemand + " more was needed");
+                }
+				//leaveCluster();
+
+			}
+            else
+            {
+                double roundDemand = Math.min(Math.max(totalDemand,0),1);
+
+                if (game.getRole(getID()) == Role.HEAD) {
+                    provision(2);
+                }   else {
+                    provision(0);
+                }
 
 				if (Random.randomDouble() < pCheat) {
 					// cheat: provision less than g
-					provision(g * Random.randomDouble());
-					demand(q);
+					//provision(0);
+                    //demand 1 unit, and provide total demand needed before deadline (departure)
+					demand(roundDemand,totalDemand,departureRound);
 				} else {
-					provision(g);
-					demand(q);
+					//provision(0);
+                    demand(roundDemand,totalDemand,departureRound);
 				}
 			}
 		} else if (game.getRound() == RoundType.APPROPRIATE) {
@@ -114,10 +138,12 @@ public class EVPoolPlayer extends AbstractParticipant {
 		}
 	}
 
-	protected void demand(double d) {
+	protected void demand(double d, double total, int deadline) {
 		try {
-			environment.act(new Demand(d), getID(), authkey);
+			environment.act(new Demand(d, total, deadline), getID(), authkey);
 			this.d = d;
+            this.total = total;
+            this.deadline = deadline;
 		} catch (ActionHandlingException e) {
 			logger.warn("Failed to demand", e);
 		}
@@ -148,7 +174,7 @@ public class EVPoolPlayer extends AbstractParticipant {
 		}
 	}
 
-	protected void calculateScores() {
+/*	protected void calculateScores() {
 		double r = game.getAllocated(getID());
 		double rP = game.getAppropriated(getID());
 		double rTotal = rP + (this.g - this.p);
@@ -180,5 +206,5 @@ public class EVPoolPlayer extends AbstractParticipant {
 			state.setProperty("o", Double.toString(satisfaction));
 			state.setProperty("cluster", "c" + this.cluster.getId());
 		}
-	}
+	}*/
 }

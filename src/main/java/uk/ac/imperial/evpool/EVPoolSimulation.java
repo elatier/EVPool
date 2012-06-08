@@ -8,7 +8,6 @@ import org.apache.log4j.Logger;
 import org.drools.runtime.StatefulKnowledgeSession;
 
 import uk.ac.imperial.lpgdash.RoundType;
-import uk.ac.imperial.lpgdash.actions.Generate;
 import uk.ac.imperial.lpgdash.actions.JoinCluster;
 import uk.ac.imperial.lpgdash.actions.LPGActionHandler;
 import uk.ac.imperial.lpgdash.allocators.LegitimateClaims;
@@ -53,16 +52,12 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 	@Parameter(name = "clusters")
 	public String clusters;
 
-	@Parameter(name = "alpha")
-	public double alpha;
-	@Parameter(name = "beta")
-	public double beta;
 	@Parameter(name = "seed")
 	public int seed;
 
 	public EVPoolSimulation(Set<AbstractModule> modules) {
 		super(modules);
-	}
+    }
 
 	@Inject
 	public void setSession(StatefulKnowledgeSession session) {
@@ -85,10 +80,12 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 		modules.add(new AbstractEnvironmentModule()
 				.addActionHandler(LPGActionHandler.class)
 				.addParticipantGlobalEnvironmentService(EVPoolService.class)
-				.setStorage(RuleStorage.class));
+				.setStorage(RuleStorage.class)
+				 );
 		modules.add(new RuleModule().addClasspathDrlFile("LPGDash.drl")
-                //.addClasspathDrlFile("RationAllocation.drl")
+                .addClasspathDrlFile("RationAllocation.drl")
                 .addClasspathDrlFile("RandomAllocation.drl")
+                .addClasspathDrlFile("NeedBasedAllocation.drl")
                         //.addClasspathDrlFile("LegitimateClaimsAllocation.drl")
                 .addStateTranslator(SimParticipantsTranslator.class));
 		modules.add(NetworkModule.noNetworkModule());
@@ -103,7 +100,8 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 		session.setGlobal("session", session);
 		session.setGlobal("storage", this.storage);
 		LegitimateClaims.sto = this.storage;
-		Allocation c0All = Allocation.RANDOM;
+
+        Allocation c0All = Allocation.RANDOM;
 		for (Allocation a : Allocation.values()) {
 			if (clusters.equalsIgnoreCase(a.name())) {
 				c0All = a;
@@ -112,24 +110,29 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 		}
 		Cluster c = new Cluster(0, c0All);
 		session.insert(c);
+
+        int arrivalRound = 0;
+        int departureRound = (finishTime-1)/2-1;
+        double batteryCap = 100;
+
 		for (int n = 0; n < cCount; n++) {
 			UUID pid = Random.randomUUID();
-			s.addParticipant(new EVPoolPlayer(pid, "c" + n, cPCheat, alpha, beta));
-			Player p = new Player(pid, "c" + n, "C", alpha, beta);
+			s.addParticipant(new EVPoolPlayer(pid, "c" + n, cPCheat, arrivalRound, departureRound));
+			Player p = new Player(pid, "c" + n, "C", batteryCap, Random.randomDouble()*100 );
 			players.add(p);
 			session.insert(p);
 			session.insert(new JoinCluster(p, c));
-			session.insert(new Generate(p, game.getRoundNumber() + 1));
+			//session.insert(new Generate(p, game.getRoundNumber() + 1));
 		}
-		for (int n = 0; n < ncCount; n++) {
+		/*for (int n = 0; n < ncCount; n++) {
 			UUID pid = Random.randomUUID();
 			s.addParticipant(new EVPoolPlayer(pid, "nc" + n, ncPCheat, alpha, beta));
 			Player p = new Player(pid, "nc" + n, "N", alpha, beta);
 			players.add(p);
 			session.insert(p);
 			session.insert(new JoinCluster(p, c));
-			session.insert(new Generate(p, game.getRoundNumber() + 1));
-		}
+			//session.insert(new Generate(p, game.getRoundNumber() + 1));
+		}*/
 	}
 
 	@Override
@@ -137,7 +140,7 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 		if (this.game.getRound() == RoundType.APPROPRIATE) {
 			// generate new g and q
 			for (Player p : players) {
-				session.insert(new Generate(p, game.getRoundNumber() + 1));
+				//session.insert(new Generate(p, game.getRoundNumber() + 1));
 			}
 		}
 	}
