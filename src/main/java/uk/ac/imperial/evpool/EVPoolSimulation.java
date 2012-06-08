@@ -8,8 +8,8 @@ import org.apache.log4j.Logger;
 import org.drools.runtime.StatefulKnowledgeSession;
 
 import uk.ac.imperial.lpgdash.RoundType;
+import uk.ac.imperial.lpgdash.actions.EVPoolActionHandler;
 import uk.ac.imperial.lpgdash.actions.JoinCluster;
-import uk.ac.imperial.lpgdash.actions.LPGActionHandler;
 import uk.ac.imperial.lpgdash.allocators.LegitimateClaims;
 import uk.ac.imperial.lpgdash.facts.Allocation;
 import uk.ac.imperial.lpgdash.facts.Cluster;
@@ -78,11 +78,11 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 	protected Set<AbstractModule> getModules() {
 		Set<AbstractModule> modules = new HashSet<AbstractModule>();
 		modules.add(new AbstractEnvironmentModule()
-				.addActionHandler(LPGActionHandler.class)
+				.addActionHandler(EVPoolActionHandler.class)
 				.addParticipantGlobalEnvironmentService(EVPoolService.class)
 				.setStorage(RuleStorage.class)
 				 );
-		modules.add(new RuleModule().addClasspathDrlFile("LPGDash.drl")
+		modules.add(new RuleModule().addClasspathDrlFile("EVPool.drl")
                 .addClasspathDrlFile("RationAllocation.drl")
                 .addClasspathDrlFile("RandomAllocation.drl")
                 .addClasspathDrlFile("NeedBasedAllocation.drl")

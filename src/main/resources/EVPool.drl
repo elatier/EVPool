@@ -78,7 +78,6 @@ rule "Discard Rounds"
 		$r2 : Round( number < $n )
 	then
 		logger.info($r);
-		logger.info("discard:"+$r2);
 		retract( $r2 );
 end
 
@@ -89,7 +88,6 @@ rule "Discard Rounds intermediate"
 		$r2 : Round( number == $n, type == RoundType.DEMAND )
 	then
 		logger.info($r);
-		logger.info("discard intermediate:"+$r2);
 		retract( $r2 );
 end
 

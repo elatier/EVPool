@@ -20,17 +20,17 @@ import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
 
-public class LPGActionHandler implements ActionHandler {
+public class EVPoolActionHandler implements ActionHandler {
 
-	final private Logger logger = Logger.getLogger(LPGActionHandler.class);
+	final private Logger logger = Logger.getLogger(EVPoolActionHandler.class);
 	final StatefulKnowledgeSession session;
 	Map<UUID, Player> players = new HashMap<UUID, Player>();
 	final EnvironmentServiceProvider serviceProvider;
 	EVPoolService lpgservice = null;
 
 	@Inject
-	public LPGActionHandler(StatefulKnowledgeSession session,
-			EnvironmentServiceProvider serviceProvider)
+	public EVPoolActionHandler(StatefulKnowledgeSession session,
+                               EnvironmentServiceProvider serviceProvider)
 			throws UnavailableServiceException {
 		super();
 		this.session = session;
