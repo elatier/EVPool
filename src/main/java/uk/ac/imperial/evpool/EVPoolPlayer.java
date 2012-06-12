@@ -108,8 +108,8 @@ public class EVPoolPlayer extends AbstractParticipant {
             double totalDemand = Math.max(batteryCap - chargeLevel, 0);
             double roundDemand = Math.min(totalDemand,
                     Math.min(maxChargePointRate, maxChargeRate)
-            );
-
+                    );
+            double totalTurnOfDemand = totalDemand / Math.min(maxChargePointRate, maxChargeRate);
   			//if (this.satisfaction < 0.1 && game.getRoundNumber() % 20 == 0)
 			if ( game.getRoundNumber() == departureRound) {
 
@@ -131,7 +131,7 @@ public class EVPoolPlayer extends AbstractParticipant {
                 }   else {
                    // provision(0);
                 }
-                demand(roundDemand,totalDemand,departureRound);
+                demand(roundDemand,totalTurnOfDemand,departureRound);
 
 			}
 		} else if (game.getRound() == RoundType.APPROPRIATE) {

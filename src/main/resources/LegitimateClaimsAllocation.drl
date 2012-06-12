@@ -1,13 +1,13 @@
-package uk.ac.imperial.evpool
+package uk.ac.imperial.lpgdash
 
 import java.util.List
 import java.util.ArrayList
 
-import uk.ac.imperial.evpool.ProvisionPool
-import uk.ac.imperial.evpool.actions.*
-import uk.ac.imperial.evpool.facts.*
-import uk.ac.imperial.evpool.RoundType
-import uk.ac.imperial.evpool.allocators.LegitimateClaims
+import uk.ac.imperial.lpgdash.ProvisionPool
+import uk.ac.imperial.lpgdash.actions.*
+import uk.ac.imperial.lpgdash.facts.*
+import uk.ac.imperial.lpgdash.RoundType
+import uk.ac.imperial.lpgdash.allocators.LegitimateClaims
 
 global org.apache.log4j.Logger logger
 
@@ -21,7 +21,8 @@ query lcCluster(Cluster c)
 		Allocation.LC_F4,
 		Allocation.LC_F5,
 		Allocation.LC_F6,
-		Allocation.LC_F7 ) )
+		Allocation.LC_F7,
+		Allocation.LC_SO ) )
 end
 
 rule "Create PlayerHistory"
@@ -170,9 +171,10 @@ rule "LC resource allocation"
 		lcCluster( $c ;)
 		$pool : ProvisionPool( cluster == $c )
 		$poolMembers : List(size > 0) from accumulate( MemberOf( cluster == $c, $p : player ), collectList( $p ) )
+		$lc : LegitimateClaims( c == $c )
 	then
 		logger.info( $method +" allocation for resources " + $c);
-		LegitimateClaims.allocate(session, $poolMembers, $pool.getQuantity(), $c, $method, $t );
+		$lc.allocate($poolMembers, $pool.getQuantity(), $t );
 		modify( $pool ) {
 			setQuantity(0);
 		}

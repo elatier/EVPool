@@ -29,6 +29,8 @@ import uk.ac.imperial.presage2.util.network.NetworkModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 
+import javax.tools.JavaFileManager;
+
 public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 
 	private final Logger logger = Logger
@@ -72,7 +74,7 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 	public void setServiceProvider(EnvironmentServiceProvider serviceProvider) {
 		try {
 			this.game = serviceProvider.getEnvironmentService(EVPoolService.class);
-			LegitimateClaims.game = this.game;
+			//LegitimateClaims.game = this.game;
 		} catch (UnavailableServiceException e) {
 			logger.warn("", e);
 		}
@@ -114,18 +116,18 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 		}
 
         int arrivalRound = 0;
-        int departureRound = (finishTime-1)/2-1;
+        int endRound = (finishTime-1)/2-1;
         double maxChargePointRate = mCPR*timeStepHour;
         double batteryCap = bC;
         double maxChargeRate = mCR*timeStepHour;
-        double headProvision = cCount *1.25*maxChargePointRate;
-
+        double headProvision = cCount *0.5*maxChargePointRate;
         Cluster c = new Cluster(0, c0All, maxChargePointRate);
         session.insert(c);
 
 		for (int n = 0; n < cCount; n++) {
 			UUID pid = Random.randomUUID();
-			s.addParticipant(new EVPoolPlayer(pid, "c" + n, headProvision, arrivalRound, departureRound));
+            int evDepartureRound = (int) (endRound * Random.randomDouble());
+			s.addParticipant(new EVPoolPlayer(pid, "c" + n, headProvision, arrivalRound, evDepartureRound));
             //initial capacity
             double initialCapacity =  Random.randomDouble()*batteryCap;
 			Player p = new Player(pid, "c" + n, "C", batteryCap, initialCapacity, maxChargeRate);

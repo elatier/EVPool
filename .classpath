@@ -16,8 +16,8 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Maven: org.json:json:20090211"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Maven: uk.ac.imperial.presage2:presage2-util:0.3.2"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Maven: org.apache.commons:commons-math:2.2"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Maven: uk.ac.imperial.presage2:presage2-mongodb:0.3.2"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Maven: org.mongodb:mongo-java-driver:2.7.2"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Maven: uk.ac.imperial.presage2:presage2-sqldb:0.3.2"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Maven: mysql:mysql-connector-java:5.1.6"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Maven: uk.ac.imperial.presage2:presage2-webapp:war:0.3.2"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Maven: uk.ac.imperial.presage2:presage2-rules:0.3.2"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Maven: org.drools:knowledge-api:5.3.0.Final"/>
