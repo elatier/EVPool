@@ -7,12 +7,14 @@ public class Cluster {
 	final int id;
 	Allocation allocationMethod;
 	final SummaryStatistics fairnessData;
+    double maxChargePointRate;
 
-	public Cluster(int id, Allocation allocationMethod) {
+	public Cluster(int id, Allocation allocationMethod, double maxChargerRate) {
 		super();
 		this.id = id;
 		this.allocationMethod = allocationMethod;
 		this.fairnessData = new SummaryStatistics();
+        this.maxChargePointRate = maxChargerRate;
 	}
 
 	@Override
@@ -51,4 +53,7 @@ public class Cluster {
 		return true;
 	}
 
+    public double getChargePointRate() {
+        return maxChargePointRate;
+    }
 }

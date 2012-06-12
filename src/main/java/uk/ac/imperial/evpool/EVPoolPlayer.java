@@ -18,8 +18,11 @@ import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 public class EVPoolPlayer extends AbstractParticipant {
 
-    double batteryCap = 0;   //total units that can be stored int the battery
-    double chargeLevel = 0;  // units of charge int the battery
+    double batteryCap = 0;   //  full charge capacity
+    double chargeLevel = 0;  // current charge level (units of charge)
+    double maxChargeRate = 0;  //max charge rate for battery per timestep
+    double maxChargePointRate = 0; //the max rate supported by the chargePoint
+
     int arrivalRound = 0;
     int departureRound = 0;
 
@@ -33,7 +36,7 @@ public class EVPoolPlayer extends AbstractParticipant {
 	double b = 1;
 	double c = 3;
 
-	double pCheat = 0.0;
+	double headProvision = 0;
 
 	double satisfaction = 0.5;
 
@@ -41,13 +44,15 @@ public class EVPoolPlayer extends AbstractParticipant {
 
 	protected EVPoolService game;
 
-	public EVPoolPlayer(UUID id, String name) {
+
+
+    public EVPoolPlayer(UUID id, String name) {
 		super(id, name);
 	}
 
-	public EVPoolPlayer(UUID id, String name, double pCheat, int arrivalRound, int departureRound) {
+	public EVPoolPlayer(UUID id, String name, double headProvision, int arrivalRound, int departureRound) {
 		super(id, name);
-		this.pCheat = pCheat;
+		this.headProvision = headProvision;
         this.arrivalRound = arrivalRound;
         this.departureRound = departureRound;
 
@@ -67,7 +72,7 @@ public class EVPoolPlayer extends AbstractParticipant {
 			logger.warn("Couldn't get environment service", e);
 		}
 		if (this.persist != null) {
-			this.persist.setProperty("pCheat", Double.toString(this.pCheat));
+			this.persist.setProperty("headProvision", Double.toString(this.headProvision));
 			this.persist.setProperty("a", Double.toString(this.a));
 			this.persist.setProperty("b", Double.toString(this.b));
 			this.persist.setProperty("c", Double.toString(this.c));
@@ -92,44 +97,42 @@ public class EVPoolPlayer extends AbstractParticipant {
 		}
 
 		if (game.getRound() == RoundType.DEMAND) {
-
-            batteryCap = game.getBatteryCap(getID());
+            if (game.getRoundNumber() == 1) {
+                //only need to check these once per simulation
+                batteryCap = game.getBatteryCap(getID());
+                maxChargeRate = game.getMaxChargeRate(getID());
+            }
+            maxChargePointRate = cluster.getChargePointRate();
             chargeLevel = game.getChargeLevel(getID());
-            double totalDemand = batteryCap - chargeLevel;
 
-            if (game.getRoundNumber() > 1) {
-				// determine utility gained from last round
-				//calculateScores();
-			}
-			//if (this.satisfaction < 0.1 && game.getRoundNumber() % 20 == 0)
+            double totalDemand = Math.max(batteryCap - chargeLevel, 0);
+            double roundDemand = Math.min(totalDemand,
+                    Math.min(maxChargePointRate, maxChargeRate)
+            );
+
+  			//if (this.satisfaction < 0.1 && game.getRoundNumber() % 20 == 0)
 			if ( game.getRoundNumber() == departureRound) {
 
 				if (totalDemand > 0.0) {
                     leaveCluster();
                     logger.info("Player " + this + " not charged at deadline: " + totalDemand + " more was needed");
                 }
-				//leaveCluster();
+                 else {
+                    logger.info("Player " + this + " is happy, his demand was met!");
+                }
 
 			}
             else
             {
-                double roundDemand = Math.min(Math.max(totalDemand,0),1);
+
 
                 if (game.getRole(getID()) == Role.HEAD) {
-                    provision(2);
+                    provision(headProvision);
                 }   else {
-                    provision(0);
+                   // provision(0);
                 }
+                demand(roundDemand,totalDemand,departureRound);
 
-				if (Random.randomDouble() < pCheat) {
-					// cheat: provision less than g
-					//provision(0);
-                    //demand 1 unit, and provide total demand needed before deadline (departure)
-					demand(roundDemand,totalDemand,departureRound);
-				} else {
-					//provision(0);
-                    demand(roundDemand,totalDemand,departureRound);
-				}
 			}
 		} else if (game.getRound() == RoundType.APPROPRIATE) {
 			appropriate(game.getAllocated(getID()));

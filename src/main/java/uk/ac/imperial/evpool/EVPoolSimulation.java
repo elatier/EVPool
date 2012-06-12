@@ -40,13 +40,15 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 
 	@Parameter(name = "cCount")
 	public int cCount;
-	@Parameter(name = "cPCheat")
-	public double cPCheat;
 
-	@Parameter(name = "ncCount")
-	public int ncCount;
-	@Parameter(name = "ncPCheat")
-	public double ncPCheat;
+    @Parameter(name = "mCPR")
+    public double mCPR;
+
+    @Parameter(name = "bC")
+    public double bC;
+
+    @Parameter(name = "mCR")
+    public double mCR;
 
 	@Parameter(name = "clusters")
 	public String clusters;
@@ -54,7 +56,10 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 	@Parameter(name = "seed")
 	public int seed;
 
-	public EVPoolSimulation(Set<AbstractModule> modules) {
+    @Parameter(name = "timeStepHour")
+    public double timeStepHour;
+
+    public EVPoolSimulation(Set<AbstractModule> modules) {
 		super(modules);
     }
 
@@ -107,17 +112,23 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 				break;
 			}
 		}
-		Cluster c = new Cluster(0, c0All);
-		session.insert(c);
 
         int arrivalRound = 0;
         int departureRound = (finishTime-1)/2-1;
-        double batteryCap = 100;
+        double maxChargePointRate = mCPR*timeStepHour;
+        double batteryCap = bC;
+        double maxChargeRate = mCR*timeStepHour;
+        double headProvision = cCount *1.25*maxChargePointRate;
+
+        Cluster c = new Cluster(0, c0All, maxChargePointRate);
+        session.insert(c);
 
 		for (int n = 0; n < cCount; n++) {
 			UUID pid = Random.randomUUID();
-			s.addParticipant(new EVPoolPlayer(pid, "c" + n, cPCheat, arrivalRound, departureRound));
-			Player p = new Player(pid, "c" + n, "C", batteryCap, Random.randomDouble()*100 );
+			s.addParticipant(new EVPoolPlayer(pid, "c" + n, headProvision, arrivalRound, departureRound));
+            //initial capacity
+            double initialCapacity =  Random.randomDouble()*batteryCap;
+			Player p = new Player(pid, "c" + n, "C", batteryCap, initialCapacity, maxChargeRate);
 			players.add(p);
 			session.insert(p);
 			session.insert(new JoinCluster(p, c));

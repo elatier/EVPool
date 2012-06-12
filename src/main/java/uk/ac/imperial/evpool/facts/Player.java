@@ -7,21 +7,23 @@ import java.util.UUID;
 
 public class Player {
 
+    
 	UUID id;
 	final String name;
 	String type = "C";
 	//double g = 0;
 	//double q = 0;
-    double batteryCap = 0;   //total units that can be stored int the battery
-    double chargeLevel = 0;  // units of charge int the battery
-	double d = 0;    //demanded
+    double batteryCap = 0;   //  full charge capacity
+    double chargeLevel = 0;  // current charge level (units of charge)
+	double maxChargeRate = 0;  //max charge rate for battery per timestep
 
+
+    double d = 0;    //demanded
     double totalDemanded = 0;
     int deadlineSpecified = 0;
+    
 	double allocated = 0;
 	double appropriated = 0;
-	//double alpha = 0.1;
-	//double beta = 0.1;
 	Role role = Role.PROSUMER;
 
 	Map<Cluster, PlayerHistory> history = new HashMap<Cluster, PlayerHistory>();
@@ -32,13 +34,14 @@ public class Player {
 		this.name = "n/a";
 	}
 
-	public Player(UUID id, String name, String type, double batteryCap, double chargeLevel) {
+	public Player(UUID id, String name, String type, double batteryCap, double chargeLevel, double maxChargeRate) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.type = type;
 		this.batteryCap = batteryCap;
 		this.chargeLevel = chargeLevel;
+        this.maxChargeRate = maxChargeRate;
 	}
 
     public static Comparator<Player> COMPARE_BY_TOTAL_DEMANDED = new Comparator<Player>() {
@@ -65,6 +68,8 @@ public class Player {
 
         }
     };
+
+
 
 
     public double getTotalDemanded() {
@@ -179,4 +184,7 @@ public class Player {
 		return true;
 	}
 
+    public double getMaxChargeRate() {
+        return maxChargeRate;
+    }
 }

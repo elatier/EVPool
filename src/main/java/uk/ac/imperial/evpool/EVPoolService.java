@@ -137,4 +137,7 @@ public class EVPoolService extends EnvironmentService {
 			return null;
 	}
 
+    public double getMaxChargeRate(UUID player) {
+        return getPlayer(player).getMaxChargeRate();
+    }
 }
