@@ -9,6 +9,7 @@ import uk.ac.imperial.evpool.actions.LeaveCluster;
 import uk.ac.imperial.evpool.actions.Provision;
 import uk.ac.imperial.evpool.facts.Cluster;
 import uk.ac.imperial.evpool.facts.Role;
+import uk.ac.imperial.presage2.core.db.persistent.TransientAgentState;
 import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
@@ -136,6 +137,7 @@ public class EVPoolPlayer extends AbstractParticipant {
 			}
 		} else if (game.getRound() == RoundType.APPROPRIATE) {
 			appropriate(game.getAllocated(getID()));
+            storeData();
 		}
 	}
 
@@ -174,6 +176,22 @@ public class EVPoolPlayer extends AbstractParticipant {
 			logger.warn("Failed to leave cluster", e);
 		}
 	}
+
+    protected void storeData() {
+        if (this.persist != null) {
+            TransientAgentState state = this.persist.getState(game.getRoundNumber()-1);
+            //state.setProperty("g", Double.toString(g));
+           // state.setProperty("q", Double.toString(q));
+            state.setProperty("d", Double.toString(d));
+            state.setProperty("p", Double.toString(p));
+           // state.setProperty("r", Double.toString(r));
+            //state.setProperty("r'", Double.toString(rP));
+           // state.setProperty("RTotal", Double.toString(rTotal));
+            //state.setProperty("U", Double.toString(u));
+            state.setProperty("o", Double.toString(satisfaction));
+            state.setProperty("cluster", "c" + this.cluster.getId());
+        }
+    }
 
 /*	protected void calculateScores() {
 		double r = game.getAllocated(getID());
