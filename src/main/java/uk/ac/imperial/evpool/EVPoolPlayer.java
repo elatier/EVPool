@@ -14,17 +14,15 @@ import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
-import uk.ac.imperial.presage2.core.util.random.Random;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
 public class EVPoolPlayer extends AbstractParticipant {
 
     double batteryCap = 0;   //  full charge capacity
     double chargeLevel = 0;  // current charge level (units of charge)
-    double maxChargeRate = 0;  //max charge rate for battery per timestep
-    double maxChargePointRate = 0; //the max rate supported by the chargePoint
+    double maxChargeRate = 0.01;  //max charge rate for battery per timestep
+    double maxChargePointRate = 0.01; //the max rate supported by the chargePoint
 
-    int arrivalRound = 0;
     int departureRound = 0;
 
     double p = 0;    //provision
@@ -32,14 +30,7 @@ public class EVPoolPlayer extends AbstractParticipant {
     double total = 0;
     int deadline = 0;
 
-
-	double a = 2;
-	double b = 1;
-	double c = 3;
-
 	double headProvision = 0;
-
-	double satisfaction = 0.5;
 
 	Cluster cluster = null;
 
@@ -51,10 +42,9 @@ public class EVPoolPlayer extends AbstractParticipant {
 		super(id, name);
 	}
 
-	public EVPoolPlayer(UUID id, String name, double headProvision, int arrivalRound, int departureRound) {
+	public EVPoolPlayer(UUID id, String name, double headProvision, int departureRound) {
 		super(id, name);
 		this.headProvision = headProvision;
-        this.arrivalRound = arrivalRound;
         this.departureRound = departureRound;
 
 	}
@@ -73,10 +63,10 @@ public class EVPoolPlayer extends AbstractParticipant {
 			logger.warn("Couldn't get environment service", e);
 		}
 		if (this.persist != null) {
-			this.persist.setProperty("headProvision", Double.toString(this.headProvision));
+			/*this.persist.setProperty("headProvision", Double.toString(this.headProvision));
 			this.persist.setProperty("a", Double.toString(this.a));
 			this.persist.setProperty("b", Double.toString(this.b));
-			this.persist.setProperty("c", Double.toString(this.c));
+			this.persist.setProperty("c", Double.toString(this.c));*/
 			//this.persist.setProperty("alpha", Double.toString(this.alpha));
 			//this.persist.setProperty("beta", Double.toString(this.beta));
 		}
@@ -98,10 +88,12 @@ public class EVPoolPlayer extends AbstractParticipant {
 		}
 
 		if (game.getRound() == RoundType.DEMAND) {
-            if (game.getRoundNumber() == 1) {
-                //only need to check these once per simulation
+            if (game.getRoundNumber() == game.getArrivalRound(getID())+1) {
                 batteryCap = game.getBatteryCap(getID());
                 maxChargeRate = game.getMaxChargeRate(getID());
+
+            } else {
+                storeData();
             }
             maxChargePointRate = cluster.getChargePointRate();
             chargeLevel = game.getChargeLevel(getID());
@@ -110,15 +102,15 @@ public class EVPoolPlayer extends AbstractParticipant {
             double roundDemand = Math.min(totalDemand,
                     Math.min(maxChargePointRate, maxChargeRate)
                     );
-            double totalTurnOfDemand = totalDemand / Math.min(maxChargePointRate, maxChargeRate);
-  			//if (this.satisfaction < 0.1 && game.getRoundNumber() % 20 == 0)
+            double totalDemandInTurns = totalDemand / Math.min(maxChargePointRate, maxChargeRate);
 			if ( game.getRoundNumber() == departureRound) {
 
 				if (totalDemand > 0.0) {
                     leaveCluster();
-                    logger.info("Player " + this + " not charged at deadline: " + totalDemand + " more was needed");
+                    logger.warn("Player " + this + " not charged at deadline: " + totalDemand + " more was needed");
                 }
                  else {
+                    leaveCluster();
                     logger.info("Player " + this + " is happy, his demand was met!");
                 }
 
@@ -132,12 +124,12 @@ public class EVPoolPlayer extends AbstractParticipant {
                 }   else {
                    // provision(0);
                 }
-                demand(roundDemand,totalTurnOfDemand,departureRound);
+                demand(roundDemand,totalDemandInTurns,departureRound);
 
 			}
 		} else if (game.getRound() == RoundType.APPROPRIATE) {
 			appropriate(game.getAllocated(getID()));
-            storeData();
+
 		}
 	}
 
@@ -178,18 +170,21 @@ public class EVPoolPlayer extends AbstractParticipant {
 	}
 
     protected void storeData() {
+        double r = game.getAllocated(getID());
+        double rP = game.getAppropriated(getID());
         if (this.persist != null) {
             TransientAgentState state = this.persist.getState(game.getRoundNumber()-1);
-            //state.setProperty("g", Double.toString(g));
-           // state.setProperty("q", Double.toString(q));
-            state.setProperty("d", Double.toString(d));
+            state.setProperty("bC", Double.toString(batteryCap));
+            state.setProperty("cL", Double.toString(chargeLevel));
+            state.setProperty("mCR", Double.toString(maxChargeRate));
+            state.setProperty("mCPR", Double.toString(maxChargePointRate));
             state.setProperty("p", Double.toString(p));
-           // state.setProperty("r", Double.toString(r));
-            //state.setProperty("r'", Double.toString(rP));
-           // state.setProperty("RTotal", Double.toString(rTotal));
-            //state.setProperty("U", Double.toString(u));
-            state.setProperty("o", Double.toString(satisfaction));
-            state.setProperty("cluster", "c" + this.cluster.getId());
+            state.setProperty("d", Double.toString(d));
+            state.setProperty("total", Double.toString(total));
+            state.setProperty("deadline", Double.toString(deadline));
+            state.setProperty("r", Double.toString(r));
+            state.setProperty("rP", Double.toString(rP));
+            //state.setProperty("cluster", "c" + this.cluster.getId());
         }
     }
 

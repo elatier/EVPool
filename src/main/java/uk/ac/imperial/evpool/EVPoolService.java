@@ -140,4 +140,8 @@ public class EVPoolService extends EnvironmentService {
     public double getMaxChargeRate(UUID player) {
         return getPlayer(player).getMaxChargeRate();
     }
+
+    public int getArrivalRound(UUID player) {
+        return getPlayer(player).getArrivalRound();
+    }
 }

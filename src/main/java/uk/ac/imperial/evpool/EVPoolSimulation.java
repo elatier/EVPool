@@ -9,7 +9,6 @@ import org.drools.runtime.StatefulKnowledgeSession;
 
 import uk.ac.imperial.evpool.actions.EVPoolActionHandler;
 import uk.ac.imperial.evpool.actions.JoinCluster;
-import uk.ac.imperial.evpool.allocators.LegitimateClaims;
 import uk.ac.imperial.evpool.facts.Allocation;
 import uk.ac.imperial.evpool.facts.Cluster;
 import uk.ac.imperial.evpool.facts.Player;
@@ -28,8 +27,6 @@ import uk.ac.imperial.presage2.util.network.NetworkModule;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
-
-import javax.tools.JavaFileManager;
 
 public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 
@@ -105,7 +102,7 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 		session.setGlobal("logger", this.logger);
 		session.setGlobal("session", session);
 		session.setGlobal("storage", this.storage);
-		LegitimateClaims.sto = this.storage;
+		//LegitimateClaims.sto = this.storage;
 
         Allocation c0All = Allocation.RANDOM;
 		for (Allocation a : Allocation.values()) {
@@ -115,7 +112,6 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 			}
 		}
 
-        int arrivalRound = 0;
         int endRound = (finishTime-1)/2-1;
         double maxChargePointRate = mCPR*timeStepHour;
         double batteryCap = bC;
@@ -126,15 +122,20 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 
 		for (int n = 0; n < cCount; n++) {
 			UUID pid = Random.randomUUID();
-            int evDepartureRound = (int) (endRound * Random.randomDouble());
-			s.addParticipant(new EVPoolPlayer(pid, "c" + n, headProvision, arrivalRound, evDepartureRound));
-            //initial capacity
-            double initialCapacity =  Random.randomDouble()*batteryCap;
-			Player p = new Player(pid, "c" + n, "C", batteryCap, initialCapacity, maxChargeRate);
+            //time starts at 15:00, so round 1 is at 15:00, arrive from 16:00 to 19:00
+            int arrivalRound = (int) (1/timeStepHour) + (int) Math.round((3/timeStepHour) ); //* Random.randomDouble());
+            //depart from 6, up to 8 randomly, or round 60 to 68
+            int evDepartureRound = (int) (15/timeStepHour) + (int) Math.round((2/timeStepHour) * Random.randomDouble());
+            //initial capacity random from 20% to 100%
+            double initialCapacity =  Math.round(batteryCap - Random.randomDouble() * (batteryCap * 0.8)) ;
+
+			s.addParticipant(new EVPoolPlayer(pid, "c" + n, headProvision, evDepartureRound));
+			Player p = new Player(pid, "c" + n, "C", batteryCap, initialCapacity, maxChargeRate, arrivalRound, c);
 			players.add(p);
 			session.insert(p);
-			session.insert(new JoinCluster(p, c));
+			//session.insert(new JoinCluster(p, c));
 			//session.insert(new Generate(p, game.getRoundNumber() + 1));
+
 		}
 	}
 
@@ -143,7 +144,8 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 		if (this.game.getRound() == RoundType.APPROPRIATE) {
 			// generate new g and q
 			for (Player p : players) {
-				//session.insert(new Generate(p, game.getRoundNumber() + 1));
+                if (p.getArrivalRound() == this.game.getRoundNumber())
+                    session.insert(new JoinCluster(p, p.getCluster()));
 			}
 		}
 	}

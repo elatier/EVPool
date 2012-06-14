@@ -278,6 +278,8 @@ rule "Surplus allocated pool"
 		insertLogical( new Processed( $a ) );
 end
 
+
+
 rule "Calculate round fairness"
 	salience -99
 	when

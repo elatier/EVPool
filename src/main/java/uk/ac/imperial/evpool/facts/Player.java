@@ -27,14 +27,26 @@ public class Player {
 	Role role = Role.PROSUMER;
 
 	Map<Cluster, PlayerHistory> history = new HashMap<Cluster, PlayerHistory>();
+    int arrivalRound = 0;
 
-	public Player(UUID aid) {
+    public Cluster getCluster() {
+        return cluster;
+    }
+
+    Cluster cluster;
+
+    public int getArrivalRound() {
+        return arrivalRound;
+    }
+
+    public Player(UUID aid) {
 		super();
 		this.id = aid;
 		this.name = "n/a";
 	}
 
-	public Player(UUID id, String name, String type, double batteryCap, double chargeLevel, double maxChargeRate) {
+	public Player(UUID id, String name, String type, double batteryCap, double chargeLevel,
+                  double maxChargeRate, int arrivalRound, Cluster c) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -42,6 +54,8 @@ public class Player {
 		this.batteryCap = batteryCap;
 		this.chargeLevel = chargeLevel;
         this.maxChargeRate = maxChargeRate;
+        this.arrivalRound = arrivalRound;
+        this.cluster = c;
 	}
 
     public static Comparator<Player> COMPARE_BY_TOTAL_DEMANDED = new Comparator<Player>() {
@@ -89,11 +103,24 @@ public class Player {
     }
 
 
-	@Override
-	public String toString() {
-		return "Player [" + name + ", type=" + type +", role=" + role + ", bC=" + batteryCap + ", cL=" + chargeLevel
-				+ "]";
-	}
+    @Override
+    public String toString() {
+        return "Player[" +
+                ", name='" + name + '\'' +
+                ", type='" + type + '\'' +
+                ", batteryCap=" + batteryCap +
+                ", chargeLevel=" + chargeLevel +
+                ", maxChargeRate=" + maxChargeRate +
+                ", d=" + d +
+                ", totalDemanded=" + totalDemanded +
+                ", deadlineSpecified=" + deadlineSpecified +
+                ", allocated=" + allocated +
+                ", appropriated=" + appropriated +
+                ", role=" + role +
+                ", arrivalRound=" + arrivalRound +
+                ", cluster=" + cluster +
+                ']';
+    }
 
 	public UUID getId() {
 		return id;
