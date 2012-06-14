@@ -67,15 +67,9 @@ public class EVPoolStorage extends SqlStorage {
 			createTables.execute("CREATE TABLE IF NOT EXISTS `roundGlobals` ("
 					+ "`simID` int(11) NOT NULL," + "`round` int(11) NOT NULL,"
 					+ "`fairness` double NOT NULL,"
-					+ "`w_f1` double DEFAULT NULL,"
-					+ "`w_f1a` double DEFAULT NULL,"
-					+ "`w_f2` double DEFAULT NULL,"
-					+ "`w_f3` double DEFAULT NULL,"
-					+ "`w_f4` double DEFAULT NULL,"
-					+ "`w_f5` double DEFAULT NULL,"
-					+ "`w_f6` double DEFAULT NULL,"
-					+ "`w_f7` double DEFAULT NULL,"
-					+ "PRIMARY KEY (`simID`,`round`)" + ")");
+					+ "`surplus` double DEFAULT NULL,"
+                    + "`allocPool` double DEFAULT NULL,"
+  					+ "PRIMARY KEY (`simID`,`round`)" + ")");
 
 		} catch (SQLException e) {
 			logger.warn("", e);
@@ -97,8 +91,8 @@ public class EVPoolStorage extends SqlStorage {
 		try {
 			insertRound = conn
 					.prepareStatement("INSERT INTO roundGlobals "
-							+ "(simID, round, fairness, w_f1, w_f1a, w_f2, w_f3, w_f4, w_f5, w_f6, w_f7)"
-							+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ");
+							+ "(simID, round, fairness, surplus, allocPool )"
+							+ "VALUES (?, ?, ?, ?, ?) ");
 		} catch (SQLException e) {
 			logger.warn(e);
 			throw new RuntimeException(e);
@@ -119,10 +113,16 @@ public class EVPoolStorage extends SqlStorage {
 					Map<String, String> props = round.getValue();
 
 					insertRound.setLong(1, e.simId);
-					insertRound.setInt(2, round.getKey() - 1);
+					insertRound.setInt(2, round.getKey());
 					insertRound.setDouble(3,
 							getProperty(props, "c0-fairness", 0));
-					insertRound.addBatch();
+                    insertRound.setDouble(4,
+                            getProperty(props, "c0-poolSurplus", 0));
+                    insertRound.setDouble(5,
+                            getProperty(props, "c0-allocPool", 0));
+
+
+                    insertRound.addBatch();
 
 					forRemoval.add(round.getKey());
 				}

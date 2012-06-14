@@ -102,7 +102,8 @@ public class EVPoolPlayer extends AbstractParticipant {
             double roundDemand = Math.min(totalDemand,
                     Math.min(maxChargePointRate, maxChargeRate)
                     );
-            double totalDemandInTurns = totalDemand / Math.min(maxChargePointRate, maxChargeRate);
+            double totalDemandInTurns = Math.ceil(totalDemand / Math.min(maxChargePointRate, maxChargeRate));
+
 			if ( game.getRoundNumber() == departureRound) {
 
 				if (totalDemand > 0.0) {
@@ -117,8 +118,6 @@ public class EVPoolPlayer extends AbstractParticipant {
 			}
             else
             {
-
-
                 if (game.getRole(getID()) == Role.HEAD) {
                     provision(headProvision);
                 }   else {
@@ -128,7 +127,7 @@ public class EVPoolPlayer extends AbstractParticipant {
 
 			}
 		} else if (game.getRound() == RoundType.APPROPRIATE) {
-			appropriate(game.getAllocated(getID()));
+			    appropriate(game.getAllocated(getID()));
 
 		}
 	}

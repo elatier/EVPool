@@ -150,20 +150,6 @@ rule "Process Demand"
 		logger.info($d);
 end
 
-/*
-rule "Set g and q"
-	when
-		$action : Generate( $p : player, $g : g, $q : q)
-		not( Processed( $action ;) )
-	then
-		modify($p) {
-			setG( $g ),
-			setQ( $q );
-		}
-		insert( new Processed( $action ) );
-		logger.info($action);
-end*/
-
 rule "Process Allocations"
 	when
 		$a : Allocate( $p : player, $q : quantity )
@@ -268,10 +254,16 @@ rule "Surplus allocated pool"
 	when
 		$r : Round( type == RoundType.APPROPRIATE )
 		$c : Cluster( )
-		$a : AllocationPool( )
+		$a : AllocationPool($q: quantity )
 		not( Processed( $a ;) )
 	then
-		logger.info($a.getQuantity() +" pool surplus");
+		logger.info($q +" pool surplus");
+        if (storage != null) {
+            storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-poolSurplus",
+                    $r.getNumber(),
+                    Double.toString($q)
+                    );
+        }
 		modify($a) {
 			setQuantity(0);
 		}
@@ -302,3 +294,28 @@ rule "Calculate round fairness"
 					Double.toString($fairness.getStandardDeviation()));
 		}
 end
+
+/*
+
+rule "Calculate round fairness"
+	salience -99
+	when
+		$r : Round( type == RoundType.DEMAND )
+		$c : Cluster( $fairness : fairnessData )
+		$members : List(size > 0) from accumulate( MemberOf( cluster == $c, $p : player ), collectList( $p ) )
+		$allocations : List(size > 0) from accumulate(
+			Demand( $t : t, player memberOf $members, $p : player, $d : quantity, quantity > 0)
+			and
+			Allocate( t == $t, player == $p, $a : quantity ),
+			collectList( $a / $d )
+		)
+	then
+		for( Object v : $allocations ) {
+			$fairness.addValue( Math.min(((Number) v).doubleValue(), 1) );
+		}
+		if (storage != null) {
+			storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-fairness",
+					$r.getNumber(),
+					Double.toString($fairness.getStandardDeviation()));
+		}
+end*/

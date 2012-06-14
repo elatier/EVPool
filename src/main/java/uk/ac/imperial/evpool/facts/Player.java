@@ -58,33 +58,6 @@ public class Player {
         this.cluster = c;
 	}
 
-    public static Comparator<Player> COMPARE_BY_TOTAL_DEMANDED = new Comparator<Player>() {
-        public int compare(Player one, Player other) {
-            if (one.totalDemanded > other.totalDemanded) {
-                return -1;
-            }
-            else {
-                return 1;
-            }
-
-        }
-    };
-
-    public static Comparator<Player> COMPARE_BY_TOTAL_DEMANDED_AND_DEADLINE = new Comparator<Player>() {
-        public int compare(Player one, Player other) {
-            if ((one.deadlineSpecified - one.totalDemanded) <
-                    (other.deadlineSpecified - other.totalDemanded)) {
-                return -1;
-            }
-            else {
-                return 1;
-            }
-
-        }
-    };
-
-
-
 
     public double getTotalDemanded() {
         return totalDemanded;

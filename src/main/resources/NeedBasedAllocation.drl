@@ -20,7 +20,13 @@ rule "Need based resource allocation"
 		$pool : ProvisionPool( cluster == $c )
 		$poolMembers : List(size > 0) from accumulate( MemberOf( cluster == $c, $p : player ), collectList( $p ) )
 	then
-		logger.info("Need based order for resources " + $c);
+		logger.info("Need based order for resources in" + $c + " allocation pool:" + $pool.getQuantity());
+        if (storage != null) {
+            storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-allocPool",
+                    $r.getNumber(),
+                    Double.toString($pool.getQuantity())
+                    );
+        }
 		NeedBasedAllocator.allocate(session, $poolMembers, $pool.getQuantity(), $t );
 		modify( $pool ) {
 			setQuantity(0);
