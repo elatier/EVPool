@@ -28,8 +28,8 @@ public class EVPoolPlayer extends AbstractParticipant {
 
     double p = 0;    //provision
     double d = 0;    //demanded
-    double total = 0;
-    int deadline = 0;
+    double roundsToCharge = 0; //roundsToCharge
+    int specifiedDeadline = 0;
 
 	double headProvision = 0;
 
@@ -83,9 +83,9 @@ public class EVPoolPlayer extends AbstractParticipant {
 	@Override
 	public void execute() {
 		super.execute();
-		this.cluster = this.game.getCluster(getID());
 
-		if (this.cluster == null) {
+		this.cluster = this.game.getCluster(getID());
+        if (this.cluster == null) {
 			return;
 		}
 
@@ -106,11 +106,17 @@ public class EVPoolPlayer extends AbstractParticipant {
                     );
             double totalDemandInTurns = Math.ceil(totalDemand / Math.min(maxChargePointRate, maxChargeRate));
 
+            if (game.getRole(getID()) == Role.HEAD) {
+                provision(headProvision);
+            }   else {
+                // provision(0);
+            }
+
 			if ( game.getRoundNumber() == departureRound) {
 
 				if (totalDemand > 0.0) {
                     leaveCluster();
-                    logger.warn("Player " + this + " not charged at deadline: " + totalDemand + " more was needed");
+                    logger.warn("Player " + this + " not charged at specifiedDeadline: " + totalDemand + " more was needed");
                 }
                  else {
                     leaveCluster();
@@ -120,26 +126,21 @@ public class EVPoolPlayer extends AbstractParticipant {
 			}
             else
             {
-                if (game.getRole(getID()) == Role.HEAD) {
-                    provision(headProvision);
-                }   else {
-                   // provision(0);
-                }
+
                 demand(roundDemand,totalDemandInTurns,departureRound);
 
 			}
 		} else if (game.getRound() == RoundType.APPROPRIATE) {
 			    appropriate(game.getAllocated(getID()));
-
-		}
+         }
 	}
 
 	protected void demand(double d, double total, int deadline) {
 		try {
 			environment.act(new Demand(d, total, deadline), getID(), authkey);
 			this.d = d;
-            this.total = total;
-            this.deadline = deadline;
+            this.roundsToCharge = total;
+            this.specifiedDeadline = deadline;
 		} catch (ActionHandlingException e) {
 			logger.warn("Failed to demand", e);
 		}
@@ -181,8 +182,8 @@ public class EVPoolPlayer extends AbstractParticipant {
             state.setProperty("mCPR", Double.toString(maxChargePointRate));
             state.setProperty("p", Double.toString(p));
             state.setProperty("d", Double.toString(d));
-            state.setProperty("total", Double.toString(total));
-            state.setProperty("deadline", Double.toString(deadline));
+            state.setProperty("total", Double.toString(roundsToCharge));
+            state.setProperty("deadline", Double.toString(specifiedDeadline));
             state.setProperty("r", Double.toString(r));
             state.setProperty("rP", Double.toString(rP));
             //state.setProperty("cluster", "c" + this.cluster.getId());

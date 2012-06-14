@@ -55,6 +55,9 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 	@Parameter(name = "seed")
 	public int seed;
 
+    @Parameter(name = "loadLevel")
+    public double loadLevel;
+
     @Parameter(name = "timeStepHour")
     public double timeStepHour;
 
@@ -116,7 +119,7 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
         double maxChargePointRate = mCPR*timeStepHour;
         double batteryCap = bC;
         double maxChargeRate = mCR*timeStepHour;
-        double headProvision = cCount *0.15*maxChargePointRate;
+        double headProvision = cCount *loadLevel*maxChargePointRate;
         Cluster c = new Cluster(0, c0All, maxChargePointRate);
         session.insert(c);
 
