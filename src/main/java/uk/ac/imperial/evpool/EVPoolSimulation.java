@@ -116,7 +116,7 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
         double maxChargePointRate = mCPR*timeStepHour;
         double batteryCap = bC;
         double maxChargeRate = mCR*timeStepHour;
-        double headProvision = cCount *1.5*maxChargePointRate;
+        double headProvision = cCount *0.15*maxChargePointRate;
         Cluster c = new Cluster(0, c0All, maxChargePointRate);
         session.insert(c);
 
@@ -127,7 +127,7 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
             //depart from 6, up to 8 randomly, or round 60 to 68
             int evDepartureRound = (int) (15/timeStepHour) + (int) Math.round((2/timeStepHour) * Random.randomDouble());
             //initial capacity random from 20% to 100%
-            double initialCapacity =  Math.round(batteryCap - Random.randomDouble() * (batteryCap * 0.8)) ;
+            double initialCapacity =  Math.round(batteryCap*0.9 - Random.randomDouble() * (batteryCap * 0.7)) ;
 
 			s.addParticipant(new EVPoolPlayer(pid, "c" + n, headProvision, evDepartureRound));
 			Player p = new Player(pid, "c" + n, "C", batteryCap, initialCapacity, maxChargeRate, arrivalRound, c);

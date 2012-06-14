@@ -26,6 +26,10 @@ rule "Need based resource allocation"
                     $r.getNumber(),
                     Double.toString($pool.getQuantity())
                     );
+            storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-agentCount",
+                                $r.getNumber(),
+                                Double.toString($poolMembers.size())
+                                );
         }
 		NeedBasedAllocator.allocate(session, $poolMembers, $pool.getQuantity(), $t );
 		modify( $pool ) {

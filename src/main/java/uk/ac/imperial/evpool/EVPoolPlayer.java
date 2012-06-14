@@ -3,6 +3,7 @@ package uk.ac.imperial.evpool;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.log4j.Logger;
 import uk.ac.imperial.evpool.actions.Appropriate;
 import uk.ac.imperial.evpool.actions.Demand;
 import uk.ac.imperial.evpool.actions.LeaveCluster;
@@ -36,7 +37,8 @@ public class EVPoolPlayer extends AbstractParticipant {
 
 	protected EVPoolService game;
 
-
+    private static final Logger logger = Logger
+            .getLogger("uk.ac.imperial.evpool.EVPoolPlayer");
 
     public EVPoolPlayer(UUID id, String name) {
 		super(id, name);
