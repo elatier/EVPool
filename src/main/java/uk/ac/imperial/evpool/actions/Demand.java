@@ -7,18 +7,18 @@ public class Demand extends PlayerAction {
 	double quantity;
     double total;
     int deadline;
+    double charDeadline;
 
-	public Demand(double quantity, double total, int deadline) {
+    public Demand(double quantity, double total, int deadline, double chargingDeadline) {
 		this.quantity = quantity;
         this.deadline = deadline;
         this.total = total;
+        this.charDeadline = chargingDeadline;
 	}
 
-	public Demand(int t, Player player, double quantity, double total, int deadline) {
+	public Demand(int t, Player player) {
 		super(t, player);
-		this.quantity = quantity;
-        this.deadline = deadline;
-        this.total = total;
+
 	}
 
     @Override
@@ -41,5 +41,9 @@ public class Demand extends PlayerAction {
 
     public int getDeadline() {
         return deadline;
+    }
+
+    public double getCharDeadline() {
+        return charDeadline;
     }
 }

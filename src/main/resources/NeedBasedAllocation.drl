@@ -18,18 +18,18 @@ rule "Need based resource allocation"
 		$r : Round( type == RoundType.DEMAND, $t : number )
 		$c : Cluster( allocationMethod == Allocation.NEED_BASED )
 		$pool : ProvisionPool( cluster == $c )
-		$poolMembers : List(size > 0) from accumulate( MemberOf( cluster == $c, $p : player ), collectList( $p ) )
+		$poolMembers : List(size >= 0) from accumulate( MemberOf( cluster == $c, $p : player ), collectList( $p ) )
 	then
-		logger.info("Need based order for resources in" + $c + " allocation pool:" + $pool.getQuantity());
+		logger.info("Need based order for resources in" + $c + " provision pool:" + $pool.getQuantity());
         if (storage != null) {
             storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-allocPool",
                     $r.getNumber(),
                     Double.toString($pool.getQuantity())
                     );
             storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-agentCount",
-                                $r.getNumber(),
-                                Double.toString($poolMembers.size())
-                                );
+                    $r.getNumber(),
+                    Double.toString($poolMembers.size())
+                    );
         }
 		NeedBasedAllocator.allocate(session, $poolMembers, $pool.getQuantity(), $t );
 		modify( $pool ) {

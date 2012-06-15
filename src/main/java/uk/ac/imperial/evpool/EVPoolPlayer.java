@@ -3,6 +3,7 @@ package uk.ac.imperial.evpool;
 import java.util.Set;
 import java.util.UUID;
 
+import org.antlr.analysis.SemanticContext;
 import org.apache.log4j.Logger;
 import uk.ac.imperial.evpool.actions.Appropriate;
 import uk.ac.imperial.evpool.actions.Demand;
@@ -31,6 +32,8 @@ public class EVPoolPlayer extends AbstractParticipant {
     double roundsToCharge = 0; //roundsToCharge
     int specifiedDeadline = 0;
 
+    private double toAppropriate;
+
 	double headProvision = 0;
 
 	Cluster cluster = null;
@@ -39,6 +42,8 @@ public class EVPoolPlayer extends AbstractParticipant {
 
     private static final Logger logger = Logger
             .getLogger("uk.ac.imperial.evpool.EVPoolPlayer");
+    private double charDeadline;
+
 
     public EVPoolPlayer(UUID id, String name) {
 		super(id, name);
@@ -105,6 +110,7 @@ public class EVPoolPlayer extends AbstractParticipant {
                     Math.min(maxChargePointRate, maxChargeRate)
                     );
             double totalDemandInTurns = Math.ceil(totalDemand / Math.min(maxChargePointRate, maxChargeRate));
+            double chargingDeadline = departureRound - totalDemandInTurns;
 
             if (game.getRole(getID()) == Role.HEAD) {
                 provision(headProvision);
@@ -127,7 +133,7 @@ public class EVPoolPlayer extends AbstractParticipant {
             else
             {
 
-                demand(roundDemand,totalDemandInTurns,departureRound);
+                demand(roundDemand,totalDemandInTurns,departureRound,chargingDeadline);
 
 			}
 		} else if (game.getRound() == RoundType.APPROPRIATE) {
@@ -135,12 +141,18 @@ public class EVPoolPlayer extends AbstractParticipant {
          }
 	}
 
-	protected void demand(double d, double total, int deadline) {
+	protected void demand(double d, double total, int deadline, double chargingDeadline) {
 		try {
-			environment.act(new Demand(d, total, deadline), getID(), authkey);
+            if ((total == 0.0) && (total==this.roundsToCharge) && (d==this.d) && (this.d==0.0))
+            {
+                //skip demand if same as last round
+                return;
+            }
+			environment.act(new Demand(d, total, deadline, chargingDeadline), getID(), authkey);
 			this.d = d;
             this.roundsToCharge = total;
             this.specifiedDeadline = deadline;
+            this.charDeadline = chargingDeadline;
 		} catch (ActionHandlingException e) {
 			logger.warn("Failed to demand", e);
 		}
@@ -157,6 +169,12 @@ public class EVPoolPlayer extends AbstractParticipant {
 
 	protected void appropriate(double r) {
 		try {
+            if ((r == 0.0) && (r==this.toAppropriate))
+            {
+                //skip appropriate if 0.0
+                return;
+            }
+            this.toAppropriate = r;
 			environment.act(new Appropriate(r), getID(), authkey);
 		} catch (ActionHandlingException e) {
 			logger.warn("Failed to appropriate", e);
@@ -184,6 +202,7 @@ public class EVPoolPlayer extends AbstractParticipant {
             state.setProperty("d", Double.toString(d));
             state.setProperty("total", Double.toString(roundsToCharge));
             state.setProperty("deadline", Double.toString(specifiedDeadline));
+            state.setProperty("charDeadline", Double.toString(charDeadline));
             state.setProperty("r", Double.toString(r));
             state.setProperty("rP", Double.toString(rP));
             //state.setProperty("cluster", "c" + this.cluster.getId());

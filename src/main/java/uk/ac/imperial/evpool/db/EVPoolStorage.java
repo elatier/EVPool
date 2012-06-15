@@ -58,6 +58,7 @@ public class EVPoolStorage extends SqlStorage {
 					+ "`mCPR` double NOT NULL," + "`p` double NOT NULL,"
 					+ "`rP` double NOT NULL," + "`total` double NOT NULL,"
 					+ "`deadline` double NOT NULL,"
+                    + "`charDeadline` double NOT NULL,"
 					+ "`d` double NOT NULL,"
                     + "`r` double NOT NULL,"
 					+ "PRIMARY KEY (`simID`,`player`,`round`),"
@@ -160,8 +161,8 @@ public class EVPoolStorage extends SqlStorage {
 
     		insertPlayer = conn
 					.prepareStatement("INSERT INTO playerScore "
-							+ "(simID, player, round, bC, cL, mCR, mCPR, p, d, total, deadline, r, rP)  "
-							+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ");
+							+ "(simID, player, round, bC, cL, mCR, mCPR, p, d, total, deadline, charDeadline, r, rP)  "
+							+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ");
 		} catch (SQLException e) {
 			logger.warn(e);
 			throw new RuntimeException(e);
@@ -197,9 +198,10 @@ public class EVPoolStorage extends SqlStorage {
 					insertPlayer.setDouble(10,
 							getProperty(props, "total", 0.0));
 					insertPlayer.setDouble(11, getProperty(props, "deadline", 0.0));
-					insertPlayer.setDouble(12, getProperty(props, "r", 0.0));
-                    insertPlayer.setDouble(13, getProperty(props, "rP", 0.0));
-                    //insertPlayer.setString(14, getProperty(props, "cluster", 0.0));
+                    insertPlayer.setDouble(12, getProperty(props, "charDeadline", 0.0));
+					insertPlayer.setDouble(13, getProperty(props, "r", 0.0));
+                    insertPlayer.setDouble(14, getProperty(props, "rP", 0.0));
+                    //insertPlayer.setString(15, getProperty(props, "cluster", 0.0));
 
 					insertPlayer.addBatch();
 

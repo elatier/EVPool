@@ -92,6 +92,7 @@ rule "Discard Rounds intermediate"
 end
 
 rule "Init Provision Pool"
+    salience 15
 	when
 		$c : Cluster( )
 		not( ProvisionPool( cluster == $c ) )
@@ -100,6 +101,7 @@ rule "Init Provision Pool"
 end
 
 rule "Init Allocation Pool"
+    salience 15
 	when
 		$c : Cluster( )
 		not( AllocationPool( cluster == $c ) )
@@ -194,6 +196,7 @@ rule "Join cluster"
 end
 
 rule "Leave cluster"
+    salience 5
 	when
 		$a : LeaveCluster( $c : cluster, $p : player )
 		$m : MemberOf( cluster == $c, player == $p )
@@ -201,7 +204,7 @@ rule "Leave cluster"
 	then
 		retract( $m );
 		insert( new Processed( $a ) );
-		logger.info("Left cluster: "+ $p );
+		logger.info("Left cluster: "+ $p.getName() );
 end
 
 rule "Assign cluster head"
