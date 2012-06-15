@@ -1,4 +1,4 @@
-package uk.ac.imperial.lpgdash;
+package uk.ac.imperial.evpool;
 
 import static org.junit.Assert.*;
 
@@ -16,15 +16,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import uk.ac.imperial.lpgdash.actions.Appropriate;
-import uk.ac.imperial.lpgdash.actions.Demand;
-import uk.ac.imperial.lpgdash.actions.Generate;
-import uk.ac.imperial.lpgdash.actions.JoinCluster;
-import uk.ac.imperial.lpgdash.actions.Provision;
-import uk.ac.imperial.lpgdash.facts.Allocation;
-import uk.ac.imperial.lpgdash.facts.Cluster;
-import uk.ac.imperial.lpgdash.facts.Player;
-import uk.ac.imperial.lpgdash.facts.Round;
+import uk.ac.imperial.evpool.actions.Appropriate;
+import uk.ac.imperial.evpool.actions.Demand;
+import uk.ac.imperial.evpool.actions.Generate;
+import uk.ac.imperial.evpool.actions.JoinCluster;
+import uk.ac.imperial.evpool.actions.Provision;
+import uk.ac.imperial.evpool.facts.Allocation;
+import uk.ac.imperial.evpool.facts.Cluster;
+import uk.ac.imperial.evpool.facts.Player;
+import uk.ac.imperial.evpool.facts.Round;
 import uk.ac.imperial.presage2.core.util.random.Random;
 import uk.ac.imperial.presage2.rules.RuleModule;
 import uk.ac.imperial.presage2.rules.RuleStorage;
@@ -32,9 +32,9 @@ import uk.ac.imperial.presage2.rules.RuleStorage;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
-public class TestLPGRules {
+public class TestEVPoolRules {
 
-	final private Logger logger = Logger.getLogger(TestLPGRules.class);
+	final private Logger logger = Logger.getLogger(TestEVPoolRules.class);
 
 	Injector injector;
 	RuleStorage rules;
@@ -43,7 +43,7 @@ public class TestLPGRules {
 	@Before
 	public void setUp() throws Exception {
 		injector = Guice.createInjector(new RuleModule()
-				.addClasspathDrlFile("LPGDash.drl")
+				.addClasspathDrlFile("evpool.drl")
 				.addClasspathDrlFile("LegitimateClaimsAllocation.drl")
 				.addClasspathDrlFile("RandomAllocation.drl")
 				.addClasspathDrlFile("RationAllocation.drl"));

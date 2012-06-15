@@ -89,7 +89,7 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 				.setStorage(RuleStorage.class)
 				 );
 		modules.add(new RuleModule().addClasspathDrlFile("LPGDash.drl")
-                .addClasspathDrlFile("RationAllocation.drl")
+                //.addClasspathDrlFile("RationAllocation.drl")
                 .addClasspathDrlFile("RandomAllocation.drl")
                 .addClasspathDrlFile("NeedBasedAllocation.drl")
                         //.addClasspathDrlFile("LegitimateClaimsAllocation.drl")
