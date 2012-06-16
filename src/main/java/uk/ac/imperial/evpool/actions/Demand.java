@@ -7,9 +7,9 @@ public class Demand extends PlayerAction {
 	double quantity;
     double total;
     int deadline;
-    double charDeadline;
+    int charDeadline;
 
-    public Demand(double quantity, double total, int deadline, double chargingDeadline) {
+    public Demand(double quantity, double total, int deadline, int chargingDeadline) {
 		this.quantity = quantity;
         this.deadline = deadline;
         this.total = total;
@@ -43,7 +43,7 @@ public class Demand extends PlayerAction {
         return deadline;
     }
 
-    public double getCharDeadline() {
+    public int getCharDeadline() {
         return charDeadline;
     }
 }

@@ -17,10 +17,12 @@ rule "Need based resource allocation"
 	when
 		$r : Round( type == RoundType.DEMAND, $t : number )
 		$c : Cluster( allocationMethod == Allocation.NEED_BASED )
+		$apool : AllocationPool( cluster == $c)
 		$pool : ProvisionPool( cluster == $c )
+		$mPool : MinimumPool( cluster == $c )
 		$poolMembers : List(size >= 0) from accumulate( MemberOf( cluster == $c, $p : player ), collectList( $p ) )
 	then
-		logger.info("Need based order for resources in" + $c + " provision pool:" + $pool.getQuantity());
+		logger.info("Need based order for resources in " + $c + " provision pool: " + $pool.getQuantity() + " min pool: " +$mPool.getQuantity());
         if (storage != null) {
             storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-allocPool",
                     $r.getNumber(),
@@ -30,9 +32,26 @@ rule "Need based resource allocation"
                     $r.getNumber(),
                     Double.toString($poolMembers.size())
                     );
+            storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-minPool",
+                    $r.getNumber(),
+                    Double.toString($mPool.getQuantity())
+                    );
         }
-		NeedBasedAllocator.allocate(session, $poolMembers, $pool.getQuantity(), $t );
+        if ($mPool.getQuantity() > $pool.getQuantity()) {
+            logger.info("Turn: "+ $t + " Using emergency reserves :" +($mPool.getQuantity()-$pool.getQuantity()));
+            NeedBasedAllocator.allocate(session, $poolMembers, $mPool.getQuantity(), $t );
+            modify( $apool ) {
+            			setQuantity($mPool.getQuantity());
+            		}
+        }  else {
+             NeedBasedAllocator.allocate(session, $poolMembers, $pool.getQuantity(), $t );
+        }
+
 		modify( $pool ) {
 			setQuantity(0);
 		}
+		modify( $mPool ) {
+        	setQuantity(0);
+        }
 end
+

@@ -1,6 +1,5 @@
 package uk.ac.imperial.evpool.facts;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -21,8 +20,13 @@ public class Player {
     double d = 0;    //demanded
     double totalDemanded = 0;
     int deadlineSpecified = 0;
-    
-	double allocated = 0;
+    int charDeadline = 0;
+
+    public int getCharDeadline() {
+        return charDeadline;
+    }
+
+    double allocated = 0;
 	double appropriated = 0;
 	Role role = Role.PROSUMER;
 
@@ -147,7 +151,11 @@ public class Player {
         chargeLevel+=howMuch;
     }
 
-	public Role getRole() {
+    public void setCharDeadline(int charDeadline) {
+        this.charDeadline = charDeadline;
+    }
+
+    public Role getRole() {
 		return role;
 	}
 

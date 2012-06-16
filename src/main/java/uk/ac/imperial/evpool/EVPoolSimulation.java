@@ -138,7 +138,6 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 			session.insert(p);
 			//session.insert(new JoinCluster(p, c));
 			//session.insert(new Generate(p, game.getRoundNumber() + 1));
-
 		}
 	}
 

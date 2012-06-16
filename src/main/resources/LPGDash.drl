@@ -54,7 +54,17 @@ declare ProvisionPool
 	quantity: double
 end
 
+declare MinimumPool
+	cluster: Cluster @key
+	quantity: double
+end
+
 declare AllocationPool
+	cluster: Cluster @key
+	quantity: double
+end
+
+declare AllocatedPool
 	cluster: Cluster @key
 	quantity: double
 end
@@ -100,6 +110,15 @@ rule "Init Provision Pool"
 		insert(new ProvisionPool( $c, 0 ) );
 end
 
+rule "Init Minimum Pool"
+    salience 15
+	when
+		$c : Cluster( )
+		not( MinimumPool( cluster == $c ) )
+	then
+		insert(new MinimumPool( $c, 0 ) );
+end
+
 rule "Init Allocation Pool"
     salience 15
 	when
@@ -139,15 +158,25 @@ end
 rule "Process Demand"
 	salience 10
 	when
-		$r : Round( type == RoundType.DEMAND )
-		$d : Demand( this coincides $r, $p : player, $q : quantity, $tot : total, $dead :deadline )
+		$r : Round( type == RoundType.DEMAND, $t : number )
+		$c : Cluster( )
+		$pool : MinimumPool( cluster == $c )
+		$d : Demand( this coincides $r, $p : player, $q : quantity, $tot : total, $dead :deadline, $charD : charDeadline)
 		not( Processed( $d ;) )
 	then
 		modify($p) {
 			setD($q),
 			setTotalDemanded($tot),
-			setDeadlineSpecified($dead);
+			setDeadlineSpecified($dead),
+			setCharDeadline($charD);
 		}
+
+        if ($charD <= $t)  {
+            //logger.debug("Charge dead: "+$charD+ "round num"+$t);
+            modify($pool) {
+                setQuantity($pool.getQuantity() + $q);
+            }
+        }
 		insert( new Processed( $d ) );
 		logger.info($d);
 end
@@ -298,27 +327,41 @@ rule "Calculate round fairness"
 		}
 end
 
-/*
-
-rule "Calculate round fairness"
+rule "Calculate round totalDemand"
 	salience -99
 	when
-		$r : Round( type == RoundType.DEMAND )
-		$c : Cluster( $fairness : fairnessData )
+		$r : Round( type == RoundType.DEMAND, $t : number )
+		$c : Cluster( )
+		$pool : ProvisionPool( cluster == $c )
 		$members : List(size > 0) from accumulate( MemberOf( cluster == $c, $p : player ), collectList( $p ) )
-		$allocations : List(size > 0) from accumulate(
-			Demand( $t : t, player memberOf $members, $p : player, $d : quantity, quantity > 0)
-			and
-			Allocate( t == $t, player == $p, $a : quantity ),
-			collectList( $a / $d )
-		)
+		accumulate(
+            Demand( this coincides $r, player memberOf $members, $p : player, $d : quantity, quantity > 0),
+            $minSlots: sum( $d )  )
 	then
-		for( Object v : $allocations ) {
-			$fairness.addValue( Math.min(((Number) v).doubleValue(), 1) );
+        if (storage != null) {
+            storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-totalDemand",
+                    $r.getNumber(),
+                    Double.toString($minSlots.doubleValue())
+                    );
 		}
-		if (storage != null) {
-			storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-fairness",
-					$r.getNumber(),
-					Double.toString($fairness.getStandardDeviation()));
+end
+
+rule "Calculate round chDeadUnmet"
+	salience -99
+	when
+		$r : Round( type == RoundType.DEMAND, $t : number )
+		$c : Cluster( )
+		$pool : ProvisionPool( cluster == $c )
+		$members : List(size > 0) from accumulate( MemberOf( cluster == $c, $p : player ), collectList( $p ) )
+		accumulate(
+            Demand( this coincides $r, player memberOf $members, $p : player, $d : quantity, quantity > 0, $cD: charDeadline, $cD < $t),
+            $minSlots: sum( 1 )
+        )
+	then
+        if (storage != null) {
+            storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-chDeadUnmet",
+                    $r.getNumber(),
+                    Double.toString($minSlots.doubleValue())
+                    );
 		}
-end*/
+end

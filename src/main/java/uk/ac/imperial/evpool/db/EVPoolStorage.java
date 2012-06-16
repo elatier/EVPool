@@ -71,6 +71,9 @@ public class EVPoolStorage extends SqlStorage {
 					+ "`surplus` double DEFAULT NULL,"
                     + "`allocPool` double DEFAULT NULL,"
                     + "`agentCount` double DEFAULT NULL,"
+                    + "`minPool` double DEFAULT NULL,"
+                    + "`totalDemand` double DEFAULT NULL,"
+                    + "`chDeadUnmet` double DEFAULT NULL,"
   					+ "PRIMARY KEY (`simID`,`round`)" + ")");
 
 		} catch (SQLException e) {
@@ -93,8 +96,8 @@ public class EVPoolStorage extends SqlStorage {
 		try {
 			insertRound = conn
 					.prepareStatement("INSERT INTO roundGlobals "
-							+ "(simID, round, fairness, surplus, allocPool, agentCount )"
-							+ "VALUES (?, ?, ?, ?, ?, ?) ");
+							+ "(simID, round, fairness, surplus, allocPool, agentCount, minPool, totalDemand, chDeadUnmet )"
+							+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) ");
 		} catch (SQLException e) {
 			logger.warn(e);
 			throw new RuntimeException(e);
@@ -124,8 +127,12 @@ public class EVPoolStorage extends SqlStorage {
                             getProperty(props, "c0-allocPool", 0));
                     insertRound.setDouble(6,
                             getProperty(props, "c0-agentCount", 0));
-
-
+                    insertRound.setDouble(7,
+                            getProperty(props, "c0-minPool", 0));
+                    insertRound.setDouble(8,
+                            getProperty(props, "c0-totalDemand", 0));
+                    insertRound.setDouble(9,
+                            getProperty(props, "c0-chDeadUnmet", 0));
                     insertRound.addBatch();
 
 					forRemoval.add(round.getKey());
