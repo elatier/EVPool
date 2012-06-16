@@ -3,6 +3,7 @@ package uk.ac.imperial.evpool
 
 #list any import classes here.
 import java.util.List
+import java.util.Map
 import java.lang.Math
 import java.lang.Double
 import uk.ac.imperial.presage2.core.Action
@@ -16,6 +17,7 @@ import uk.ac.imperial.presage2.core.util.random.Random
 
 global org.apache.log4j.Logger logger
 global uk.ac.imperial.presage2.core.db.StorageService storage
+global Map<Integer,Double> gridLoad
 
 declare Round
 	@role( event )

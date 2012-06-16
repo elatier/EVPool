@@ -1,6 +1,7 @@
 package uk.ac.imperial.evpool;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -9,6 +10,7 @@ import org.drools.runtime.StatefulKnowledgeSession;
 
 import uk.ac.imperial.evpool.actions.EVPoolActionHandler;
 import uk.ac.imperial.evpool.actions.JoinCluster;
+import uk.ac.imperial.evpool.db.CSVImport;
 import uk.ac.imperial.evpool.facts.Allocation;
 import uk.ac.imperial.evpool.facts.Cluster;
 import uk.ac.imperial.evpool.facts.Player;
@@ -24,9 +26,11 @@ import uk.ac.imperial.presage2.rules.RuleStorage;
 import uk.ac.imperial.presage2.rules.facts.SimParticipantsTranslator;
 import uk.ac.imperial.presage2.util.environment.AbstractEnvironmentModule;
 import uk.ac.imperial.presage2.util.network.NetworkModule;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
+
+import static uk.ac.imperial.evpool.db.CSVImport.importGridLoad;
+
 
 public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 
@@ -100,11 +104,14 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 
 	@Override
 	protected void addToScenario(Scenario s) {
+
+        Map<Integer,Double> gridLoad = importGridLoad("gridLoad.csv", 30, 2);
 		Random.seed = this.seed;
 		s.addTimeDriven(this);
 		session.setGlobal("logger", this.logger);
 		session.setGlobal("session", session);
 		session.setGlobal("storage", this.storage);
+        session.setGlobal("gridLoad", gridLoad);
 		//LegitimateClaims.sto = this.storage;
 
         Allocation c0All = Allocation.RANDOM;
