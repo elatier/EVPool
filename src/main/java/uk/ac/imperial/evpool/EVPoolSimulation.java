@@ -65,6 +65,9 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
     @Parameter(name = "timeStepHour")
     public double timeStepHour;
 
+    @Parameter(name = "gridLoadFilename")
+    public String gridLoadFilename;
+
     public EVPoolSimulation(Set<AbstractModule> modules) {
 		super(modules);
     }
@@ -105,7 +108,7 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 	@Override
 	protected void addToScenario(Scenario s) {
 
-        Map<Integer,Double> gridLoad = importGridLoad("gridLoad.csv", 30, 2);
+        Map<Integer,Double> gridLoad = importGridLoad(gridLoadFilename, 30, 2);
 		Random.seed = this.seed;
 		s.addTimeDriven(this);
 		session.setGlobal("logger", this.logger);
@@ -139,7 +142,7 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
             //initial capacity random from 20% to 100%
             double initialCapacity =  Math.round(batteryCap*0.9 - Random.randomDouble() * (batteryCap * 0.7)) ;
 
-			s.addParticipant(new EVPoolPlayer(pid, "c" + n, headProvision, evDepartureRound));
+			s.addParticipant(new EVPoolPlayer(pid, "c" + n, headProvision, evDepartureRound,gridLoad));
 			Player p = new Player(pid, "c" + n, "C", batteryCap, initialCapacity, maxChargeRate, arrivalRound, c);
 			players.add(p);
 			session.insert(p);

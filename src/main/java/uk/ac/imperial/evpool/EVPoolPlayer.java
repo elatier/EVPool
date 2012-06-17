@@ -1,5 +1,6 @@
 package uk.ac.imperial.evpool;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -42,17 +43,18 @@ public class EVPoolPlayer extends AbstractParticipant {
 
     private static final Logger logger = Logger
             .getLogger("uk.ac.imperial.evpool.EVPoolPlayer");
-
+    private Map<Integer,Double> gridLoad;
 
 
     public EVPoolPlayer(UUID id, String name) {
 		super(id, name);
 	}
 
-	public EVPoolPlayer(UUID id, String name, double headProvision, int departureRound) {
+	public EVPoolPlayer(UUID id, String name, double headProvision, int departureRound, Map<Integer,Double> gridLoad) {
 		super(id, name);
 		this.headProvision = headProvision;
         this.departureRound = departureRound;
+        this.gridLoad = gridLoad;
 
 	}
 
@@ -116,7 +118,12 @@ public class EVPoolPlayer extends AbstractParticipant {
             //}
 
             if (game.getRole(getID()) == Role.HEAD) {
-                provision(headProvision);
+                double roundGridLoad = gridLoad.get(game.getRoundNumber());
+                double loadMax = gridLoad.get(-1);
+                double loadMin = gridLoad.get(-2);
+                double fractionOfMaxLoad = 1.0 -((roundGridLoad - loadMin)/(loadMax-loadMin));
+                provision(headProvision*fractionOfMaxLoad);
+
             }   else {
                 // provision(0);
             }

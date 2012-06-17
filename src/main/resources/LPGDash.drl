@@ -271,6 +271,7 @@ rule "Cluster head event"
 		insert( e );
 end
 
+/*
 rule "Unassign cluster head after 20 rounds"
 	when
 		$p : Player( role == Role.HEAD )
@@ -281,6 +282,7 @@ rule "Unassign cluster head after 20 rounds"
 		}
 		logger.info("No longer cluster head: "+ $p );
 end
+*/
 
 rule "Surplus allocated pool"
 	salience -100
@@ -304,31 +306,6 @@ rule "Surplus allocated pool"
 		insertLogical( new Processed( $a ) );
 end
 
-
-
-rule "Calculate round fairness"
-	salience -99
-	when
-		$r : Round( type == RoundType.DEMAND )
-		$c : Cluster( $fairness : fairnessData )
-		$members : List(size > 0) from accumulate( MemberOf( cluster == $c, $p : player ), collectList( $p ) )
-		$allocations : List(size > 0) from accumulate( 
-			Demand( $t : t, player memberOf $members, $p : player, $d : quantity, quantity > 0)
-			and
-			Allocate( t == $t, player == $p, $a : quantity ),
-			collectList( $a / $d )
-		)
-	then
-		for( Object v : $allocations ) {
-			$fairness.addValue( Math.min(((Number) v).doubleValue(), 1) );
-		}
-		if (storage != null) {
-			storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-fairness",
-					$r.getNumber(),
-					Double.toString($fairness.getStandardDeviation()));
-		}
-end
-
 rule "Calculate round totalDemand"
 	salience -99
 	when
@@ -342,10 +319,24 @@ rule "Calculate round totalDemand"
 	then
         if (storage != null) {
             storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-totalDemand",
-                    $r.getNumber(),
+                    $t,
                     Double.toString($minSlots.doubleValue())
                     );
+
 		}
+end
+
+rule "Store round gridLoad"
+	salience -99
+	when
+		$r : Round( type == RoundType.DEMAND, $t : number )
+    then
+        if (storage != null) {
+                  storage.getSimulation().getEnvironment().setProperty("gridLoad",
+                  $t,
+                  Double.toString((Double)gridLoad.get($t))
+            );
+        }
 end
 
 rule "Calculate round chDeadUnmet"
@@ -362,7 +353,7 @@ rule "Calculate round chDeadUnmet"
 	then
         if (storage != null) {
             storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-chDeadUnmet",
-                    $r.getNumber(),
+                    $t,
                     Double.toString($minSlots.doubleValue())
                     );
 		}

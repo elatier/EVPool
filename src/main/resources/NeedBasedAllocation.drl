@@ -38,7 +38,7 @@ rule "Need based resource allocation"
                     );
         }
         if ($mPool.getQuantity() > $pool.getQuantity()) {
-            logger.info("Turn: "+ $t + " Using emergency reserves :" +($mPool.getQuantity()-$pool.getQuantity()));
+            logger.info("Turn: "+ $t + " Using above allowance :" +($mPool.getQuantity()-$pool.getQuantity()));
             NeedBasedAllocator.allocate(session, $poolMembers, $mPool.getQuantity(), $t );
             modify( $apool ) {
             			setQuantity($mPool.getQuantity());
