@@ -18,7 +18,6 @@ public class Player {
 
 
     double d = 0;    //demanded
-    double totalDemanded = 0;
     int deadlineSpecified = 0;
     int charDeadline = 0;
 
@@ -62,15 +61,6 @@ public class Player {
         this.cluster = c;
 	}
 
-
-    public double getTotalDemanded() {
-        return totalDemanded;
-    }
-
-    public void setTotalDemanded(double totalDemanded) {
-        this.totalDemanded = totalDemanded;
-    }
-
     public int getDeadlineSpecified() {
         return deadlineSpecified;
     }
@@ -89,7 +79,6 @@ public class Player {
                 ", chargeLevel=" + chargeLevel +
                 ", maxChargeRate=" + maxChargeRate +
                 ", d=" + d +
-                ", totalDemanded=" + totalDemanded +
                 ", deadlineSpecified=" + deadlineSpecified +
                 ", allocated=" + allocated +
                 ", appropriated=" + appropriated +
@@ -195,4 +184,5 @@ public class Player {
     public double getMaxChargeRate() {
         return maxChargeRate;
     }
-}
+
+ }

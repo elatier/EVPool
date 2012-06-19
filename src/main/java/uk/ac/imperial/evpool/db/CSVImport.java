@@ -49,7 +49,7 @@ public class CSVImport {
                 } else {
                     round = (((period-roundStartPos)*timeStepsInHalfHour) % (48*timeStepsInHalfHour))+1;
                 }
-                //logger.debug("period:"+period+" round:"+round+" timeStep:"+timeStepsInHalfHour+" period-roundstartpos:"+(period-roundStartPos));
+                logger.debug("period:"+period+" round:"+round+" timeStep:"+timeStepsInHalfHour+" period-roundstartpos:"+(period-roundStartPos));
                 for (int a = 0;a < timeStepsInHalfHour; a++)  {
                     gridLoad.put(round+a,load);
                 }

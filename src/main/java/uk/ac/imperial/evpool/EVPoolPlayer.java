@@ -29,13 +29,10 @@ public class EVPoolPlayer extends AbstractParticipant {
 
     double p = 0;    //provision
     double d = 0;    //demanded
-    double roundsToCharge = 0; //roundsToCharge
     int specifiedDeadline = 0;
 
     private double toAppropriate;
     private int charDeadline;
-
-	double headProvision = 0;
 
 	Cluster cluster = null;
 
@@ -50,9 +47,8 @@ public class EVPoolPlayer extends AbstractParticipant {
 		super(id, name);
 	}
 
-	public EVPoolPlayer(UUID id, String name, double headProvision, int departureRound, Map<Integer,Double> gridLoad) {
+	public EVPoolPlayer(UUID id, String name, int departureRound, Map<Integer,Double> gridLoad) {
 		super(id, name);
-		this.headProvision = headProvision;
         this.departureRound = departureRound;
         this.gridLoad = gridLoad;
 
@@ -122,7 +118,7 @@ public class EVPoolPlayer extends AbstractParticipant {
                 double loadMax = gridLoad.get(-1);
                 double loadMin = gridLoad.get(-2);
                 double fractionOfMaxLoad = 1.0 -((roundGridLoad - loadMin)/(loadMax-loadMin));
-                provision(headProvision*fractionOfMaxLoad);
+                //provision(headProvision*fractionOfMaxLoad);
 
             }   else {
                 // provision(0);
@@ -132,19 +128,19 @@ public class EVPoolPlayer extends AbstractParticipant {
 
 				if (totalDemand > 0.0) {
                     leaveCluster();
-                    logger.warn("Player " + this + " not charged at:"+ departureRound +" "+ totalDemand
+                    logger.warn("Player " + this + " not charged at:"+ departureRound +", "+ totalDemand
                             + " more was needed. "+"Charding deadline: " + chargingDeadline);
                 }
                  else {
                     leaveCluster();
-                    logger.info("Player " + this + " is happy, his demand was met!");
+                    logger.info("Player " + this + " contract was satisfied.");
                 }
 
 			}
             else
             {
 
-                demand(roundDemand,totalDemandInTurns,departureRound,chargingDeadline);
+                demand(roundDemand,departureRound,chargingDeadline);
 
 			}
 		} else if (game.getRound() == RoundType.APPROPRIATE) {
@@ -152,16 +148,15 @@ public class EVPoolPlayer extends AbstractParticipant {
          }
 	}
 
-	protected void demand(double d, double total, int deadline, int chargingDeadline) {
+	protected void demand(double d, int deadline, int chargingDeadline) {
 		try {
-           /* if ((total == 0.0) && (total==this.roundsToCharge) && (d==this.d) && (this.d==0.0))
+            /*if ((total == 0.0) && (total==this.roundsToCharge) && (d==this.d) && (this.d==0.0))
             {
                 //skip demand if same as last round
                 return;
-            }*/
-			environment.act(new Demand(d, total, deadline, chargingDeadline), getID(), authkey);
+            } */
+			environment.act(new Demand(d, deadline, chargingDeadline), getID(), authkey);
 			this.d = d;
-            this.roundsToCharge = total;
             this.specifiedDeadline = deadline;
             this.charDeadline = chargingDeadline;
 		} catch (ActionHandlingException e) {
@@ -180,11 +175,11 @@ public class EVPoolPlayer extends AbstractParticipant {
 
 	protected void appropriate(double r) {
 		try {
-         /*   if ((r == 0.0) && (r==this.toAppropriate))
+            if ((r == 0.0) && (r==this.toAppropriate))
             {
                 //skip appropriate if 0.0
                 return;
-            }*/
+            }
             this.toAppropriate = r;
 			environment.act(new Appropriate(r), getID(), authkey);
 		} catch (ActionHandlingException e) {
@@ -211,7 +206,6 @@ public class EVPoolPlayer extends AbstractParticipant {
             state.setProperty("mCPR", Double.toString(maxChargePointRate));
             state.setProperty("p", Double.toString(p));
             state.setProperty("d", Double.toString(d));
-            state.setProperty("total", Double.toString(roundsToCharge));
             state.setProperty("deadline", Double.toString(specifiedDeadline));
             state.setProperty("charDeadline", Double.toString(charDeadline));
             state.setProperty("r", Double.toString(r));

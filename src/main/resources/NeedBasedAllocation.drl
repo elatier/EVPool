@@ -8,45 +8,77 @@ import uk.ac.imperial.evpool.ProvisionPool
 import uk.ac.imperial.evpool.actions.*
 import uk.ac.imperial.evpool.facts.*
 import uk.ac.imperial.evpool.RoundType
+import uk.ac.imperial.presage2.db.sql.Environment
 
 global org.apache.log4j.Logger logger
 global org.drools.runtime.StatefulKnowledgeSession session
+global Map<Integer,Double> gridLoad
+global Double maxChargePointRate
+global Double loadLevel
+
 
 rule "Need based resource allocation"
 	no-loop
 	when
 		$r : Round( type == RoundType.DEMAND, $t : number )
 		$c : Cluster( allocationMethod == Allocation.NEED_BASED )
-		$apool : AllocationPool( cluster == $c)
+		$aPool : AllocationPool( cluster == $c)
 		$pool : ProvisionPool( cluster == $c )
 		$mPool : MinimumPool( cluster == $c )
 		$poolMembers : List(size >= 0) from accumulate( MemberOf( cluster == $c, $p : player ), collectList( $p ) )
 	then
-		logger.info("Need based order for resources in " + $c + " provision pool: " + $pool.getQuantity() + " min pool: " +$mPool.getQuantity());
         if (storage != null) {
-            storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-allocPool",
+            storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-intProvisionPool",
                     $r.getNumber(),
                     Double.toString($pool.getQuantity())
                     );
+        }
+        if (storage != null) {
             storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-agentCount",
                     $r.getNumber(),
                     Double.toString($poolMembers.size())
                     );
+        }
+
+        Double ePool = 0.0; //external pool
+		Double headProvision = $poolMembers.size() * maxChargePointRate*loadLevel;
+		if (headProvision > $mPool.getQuantity()) {
+             ePool = headProvision - $pool.getQuantity();
+             logger.info("HeadProvision: "+headProvision+", Adding from outside grid:" +ePool);
+		}  else {
+		     ePool = $mPool.getQuantity() - $pool.getQuantity();
+             logger.info("MinimumPool: "+$mPool.getQuantity() + ", Adding from outside grid:" +ePool);
+		}
+        modify( $aPool ) {
+            //allocation pool is made of provision and external pools
+            setQuantity($pool.getQuantity()+ePool);
+        }
+        logger.info("NeedBased allocation " + $c + " using allocation pool: " + $aPool.getQuantity());
+        NeedBasedAllocator.allocate(session, $poolMembers, $aPool.getQuantity(), $t );
+        if (storage != null) {
+            storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-allocPool",
+                    $r.getNumber(),
+                    Double.toString($aPool.getQuantity())
+                    );
+        }
+        if (storage != null) {
             storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-minPool",
                     $r.getNumber(),
                     Double.toString($mPool.getQuantity())
                     );
         }
-        if ($mPool.getQuantity() > $pool.getQuantity()) {
-            logger.info("Turn: "+ $t + " Using above allowance :" +($mPool.getQuantity()-$pool.getQuantity()));
-            NeedBasedAllocator.allocate(session, $poolMembers, $mPool.getQuantity(), $t );
-            modify( $apool ) {
-            			setQuantity($mPool.getQuantity());
-            		}
-        }  else {
-             NeedBasedAllocator.allocate(session, $poolMembers, $pool.getQuantity(), $t );
+        if (storage != null) {
+            storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-extPool",
+                    $r.getNumber(),
+                    Double.toString(ePool)
+                    );
         }
-
+        if (storage != null) {
+            storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-headProvision",
+                    $r.getNumber(),
+                    Double.toString(headProvision)
+                    );
+        }
 		modify( $pool ) {
 			setQuantity(0);
 		}
@@ -55,3 +87,20 @@ rule "Need based resource allocation"
         }
 end
 
+
+rule "Head agent add to provision pool"
+    salience 11
+	when
+        $r : Round( type == RoundType.DEMAND, $t : number )
+        $c : Cluster( allocationMethod == Allocation.NEED_BASED )
+        $pool : ProvisionPool( cluster == $c )
+        //$mPool : MinimumPool( cluster == $c )
+        $poolMembers : List(size > 0) from accumulate( MemberOf( cluster == $c, $p : player ), collectList( $p ) )
+        $head : Player( role == Role.HEAD ) from $poolMembers
+	then
+	    double extra = 100 * maxChargePointRate*loadLevel;
+	    logger.info("Turn: "+ $t + " Adding to provision pool of:" +$pool.getQuantity()+" this amount: "+extra);
+        session.insert(new Provision($t, $head, 100.0));
+
+
+end

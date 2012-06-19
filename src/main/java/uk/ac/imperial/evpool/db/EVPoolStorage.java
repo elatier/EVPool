@@ -56,7 +56,7 @@ public class EVPoolStorage extends SqlStorage {
 					+ "`round` int(11) NOT NULL," + "`cL` double NOT NULL,"
 					+ "`bC` double NOT NULL," + "`mCR` double NOT NULL,"
 					+ "`mCPR` double NOT NULL," + "`p` double NOT NULL,"
-					+ "`rP` double NOT NULL," + "`total` double NOT NULL,"
+					+ "`rP` double NOT NULL,"
 					+ "`deadline` double NOT NULL,"
                     + "`charDeadline` double NOT NULL,"
 					+ "`d` double NOT NULL,"
@@ -64,17 +64,18 @@ public class EVPoolStorage extends SqlStorage {
 					+ "PRIMARY KEY (`simID`,`player`,`round`),"
 					+ "KEY `simID` (`simID`)," + "KEY `player` (`player`),"
 					+ "KEY `round` (`round`)" + ")");
-
 			createTables.execute("CREATE TABLE IF NOT EXISTS `roundGlobals` ("
 					+ "`simID` int(11) NOT NULL," + "`round` int(11) NOT NULL,"
-					+ "`fairness` double NOT NULL,"
-					+ "`surplus` double DEFAULT NULL,"
-                    + "`allocPool` double DEFAULT NULL,"
+					+ "`headProvision` double DEFAULT NULL,"
+					+ "`allocPoolSurplus` double DEFAULT NULL,"
+                    + "`intProvisionPool` double DEFAULT NULL,"
                     + "`agentCount` double DEFAULT NULL,"
                     + "`minPool` double DEFAULT NULL,"
                     + "`totalDemand` double DEFAULT NULL,"
                     + "`chDeadUnmet` double DEFAULT NULL,"
                     + "`gridLoad` double DEFAULT NULL,"
+                    + "`extPool` double DEFAULT NULL,"
+                    + "`allocPool` double DEFAULT NULL,"
   					+ "PRIMARY KEY (`simID`,`round`)" + ")");
 
 		} catch (SQLException e) {
@@ -97,8 +98,9 @@ public class EVPoolStorage extends SqlStorage {
 		try {
 			insertRound = conn
 					.prepareStatement("INSERT INTO roundGlobals "
-							+ "(simID, round, fairness, surplus, allocPool, agentCount, minPool, totalDemand, chDeadUnmet, gridLoad )"
-							+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?) ");
+							+ "(simID, round, headProvision, allocPoolSurplus, intProvisionPool, agentCount,"
+                            + " minPool, totalDemand, chDeadUnmet, gridLoad, extPool, allocPool )"
+							+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ");
 		} catch (SQLException e) {
 			logger.warn(e);
 			throw new RuntimeException(e);
@@ -121,11 +123,11 @@ public class EVPoolStorage extends SqlStorage {
 					insertRound.setLong(1, e.simId);
 					insertRound.setInt(2, round.getKey());
 					insertRound.setDouble(3,
-							getProperty(props, "c0-fairness", 0));
+							getProperty(props, "c0-headProvision", 0));
                     insertRound.setDouble(4,
-                            getProperty(props, "c0-poolSurplus", 0));
+                            getProperty(props, "c0-allocPoolSurplus", 0));
                     insertRound.setDouble(5,
-                            getProperty(props, "c0-allocPool", 0));
+                            getProperty(props, "c0-intProvisionPool", 0));
                     insertRound.setDouble(6,
                             getProperty(props, "c0-agentCount", 0));
                     insertRound.setDouble(7,
@@ -136,6 +138,10 @@ public class EVPoolStorage extends SqlStorage {
                             getProperty(props, "c0-chDeadUnmet", 0));
                     insertRound.setDouble(10,
                             getProperty(props, "gridLoad", 0));
+                    insertRound.setDouble(11,
+                            getProperty(props, "c0-extPool", 0));
+                    insertRound.setDouble(12,
+                            getProperty(props, "c0-allocPool", 0));
                     insertRound.addBatch();
 
 					forRemoval.add(round.getKey());
@@ -171,8 +177,8 @@ public class EVPoolStorage extends SqlStorage {
 
     		insertPlayer = conn
 					.prepareStatement("INSERT INTO playerScore "
-							+ "(simID, player, round, bC, cL, mCR, mCPR, p, d, total, deadline, charDeadline, r, rP)  "
-							+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ");
+							+ "(simID, player, round, bC, cL, mCR, mCPR, p, d, deadline, charDeadline, r, rP)  "
+							+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ");
 		} catch (SQLException e) {
 			logger.warn(e);
 			throw new RuntimeException(e);
@@ -205,12 +211,10 @@ public class EVPoolStorage extends SqlStorage {
 					insertPlayer.setDouble(7, getProperty(props, "mCPR", 0.0));
 					insertPlayer.setDouble(8, getProperty(props, "p", 0.0));
 					insertPlayer.setDouble(9, getProperty(props, "d", 0.0));
-					insertPlayer.setDouble(10,
-							getProperty(props, "total", 0.0));
-					insertPlayer.setDouble(11, getProperty(props, "deadline", 0.0));
-                    insertPlayer.setDouble(12, getProperty(props, "charDeadline", 0.0));
-					insertPlayer.setDouble(13, getProperty(props, "r", 0.0));
-                    insertPlayer.setDouble(14, getProperty(props, "rP", 0.0));
+					insertPlayer.setDouble(10, getProperty(props, "deadline", 0.0));
+                    insertPlayer.setDouble(11, getProperty(props, "charDeadline", 0.0));
+					insertPlayer.setDouble(12, getProperty(props, "r", 0.0));
+                    insertPlayer.setDouble(13, getProperty(props, "rP", 0.0));
                     //insertPlayer.setString(15, getProperty(props, "cluster", 0.0));
 
 					insertPlayer.addBatch();

@@ -5,6 +5,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import cern.jet.random.Normal;
+import cern.jet.random.engine.RandomEngine;
+import cern.jet.random.engine.MersenneTwister64;
 import org.apache.log4j.Logger;
 import org.drools.runtime.StatefulKnowledgeSession;
 
@@ -81,13 +84,12 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 	public void setServiceProvider(EnvironmentServiceProvider serviceProvider) {
 		try {
 			this.game = serviceProvider.getEnvironmentService(EVPoolService.class);
-			//LegitimateClaims.game = this.game;
 		} catch (UnavailableServiceException e) {
 			logger.warn("", e);
 		}
 	}
 
-	@Override
+    @Override
 	protected Set<AbstractModule> getModules() {
 		Set<AbstractModule> modules = new HashSet<AbstractModule>();
 		modules.add(new AbstractEnvironmentModule()
@@ -108,14 +110,24 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 	@Override
 	protected void addToScenario(Scenario s) {
 
-        Map<Integer,Double> gridLoad = importGridLoad(gridLoadFilename, 30, 2);
+        RandomEngine engine = new MersenneTwister64(seed);
+        Normal normal = new Normal(0, 1, engine);
+
+        double maxChargePointRate = mCPR*timeStepHour;
+        double batteryCap = bC;
+        double maxChargeRate = mCR*timeStepHour;
+       // double headProvision = cCount *loadLevel*maxChargePointRate;
+
+        Map<Integer,Double> gridLoad = importGridLoad(gridLoadFilename, 24, 2);
 		Random.seed = this.seed;
 		s.addTimeDriven(this);
+        //this.storage = null;
 		session.setGlobal("logger", this.logger);
 		session.setGlobal("session", session);
 		session.setGlobal("storage", this.storage);
         session.setGlobal("gridLoad", gridLoad);
-		//LegitimateClaims.sto = this.storage;
+        session.setGlobal("loadLevel", loadLevel);
+        session.setGlobal("maxChargePointRate", maxChargePointRate);
 
         Allocation c0All = Allocation.RANDOM;
 		for (Allocation a : Allocation.values()) {
@@ -125,24 +137,19 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 			}
 		}
 
-        int endRound = (finishTime-1)/2-1;
-        double maxChargePointRate = mCPR*timeStepHour;
-        double batteryCap = bC;
-        double maxChargeRate = mCR*timeStepHour;
-        double headProvision = cCount *loadLevel*maxChargePointRate;
         Cluster c = new Cluster(0, c0All, maxChargePointRate);
         session.insert(c);
 
 		for (int n = 0; n < cCount; n++) {
 			UUID pid = Random.randomUUID();
-            //time starts at 15:00, so round 1 is at 15:00, arrive from 16:00 to 19:00
-            int arrivalRound = (int) (1/timeStepHour) + (int) Math.round((3/timeStepHour) * Random.randomDouble());
-            //depart from 6, up to 8 randomly, or round 60 to 68
-            int evDepartureRound = (int) (15/timeStepHour) + (int) Math.round((2/timeStepHour) * Random.randomDouble());
-            //initial capacity random from 20% to 100%
+            //time starts at 12:00pm, so round 1 is at 12:00, arrive home 18+-N(0,1)
+            int arrivalRound = (int) (6/timeStepHour) + (int) Math.round((1/timeStepHour) * normal.nextDouble());
+            //depart from 8 randomly, or
+            int evDepartureRound = (int) (20/timeStepHour) + (int) Math.round((1/timeStepHour) * normal.nextDouble());
+            //initial capacity random from 20% to 90%
             double initialCapacity =  Math.round(batteryCap*0.9 - Random.randomDouble() * (batteryCap * 0.7)) ;
 
-			s.addParticipant(new EVPoolPlayer(pid, "c" + n, headProvision, evDepartureRound,gridLoad));
+			s.addParticipant(new EVPoolPlayer(pid, "c" + n, evDepartureRound,gridLoad));
 			Player p = new Player(pid, "c" + n, "C", batteryCap, initialCapacity, maxChargeRate, arrivalRound, c);
 			players.add(p);
 			session.insert(p);
@@ -154,7 +161,7 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 	@Override
 	public void incrementTime() {
 		if (this.game.getRound() == RoundType.APPROPRIATE) {
-			// generate new g and q
+			// add players to clusters when they arrival times comes
 			for (Player p : players) {
                 if (p.getArrivalRound() == this.game.getRoundNumber())
                     session.insert(new JoinCluster(p, p.getCluster()));

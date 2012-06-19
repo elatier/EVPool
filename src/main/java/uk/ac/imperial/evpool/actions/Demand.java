@@ -5,14 +5,12 @@ import uk.ac.imperial.evpool.facts.Player;
 public class Demand extends PlayerAction {
 
 	double quantity;
-    double total;
     int deadline;
     int charDeadline;
 
-    public Demand(double quantity, double total, int deadline, int chargingDeadline) {
+    public Demand(double quantity, int deadline, int chargingDeadline) {
 		this.quantity = quantity;
         this.deadline = deadline;
-        this.total = total;
         this.charDeadline = chargingDeadline;
 	}
 
@@ -23,21 +21,16 @@ public class Demand extends PlayerAction {
 
     @Override
     public String toString() {
-        return "Demand[" +
+        return "Demand{" +
                 "quantity=" + quantity +
-                ", player=" + player.getName() +
-                ", total=" + total +
                 ", deadline=" + deadline +
-                ']';
+                ", charDeadline=" + charDeadline +
+                '}';
     }
 
 	public double getQuantity() {
 		return quantity;
 	}
-
-    public double getTotal() {
-        return total;
-    }
 
     public int getDeadline() {
         return deadline;

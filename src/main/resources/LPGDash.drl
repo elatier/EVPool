@@ -19,6 +19,7 @@ global org.apache.log4j.Logger logger
 global uk.ac.imperial.presage2.core.db.StorageService storage
 global Map<Integer,Double> gridLoad
 
+
 declare Round
 	@role( event )
 end
@@ -130,7 +131,7 @@ rule "Init Allocation Pool"
 		insert(new AllocationPool( $c, 0 ) );
 end
 
-rule "AllocationPool mirrors ProvisionPool increases"
+/*rule "AllocationPool mirrors ProvisionPool increases"
 	when
 		$c : Cluster( )
 		$p : ProvisionPool( cluster == $c, $pq : quantity )
@@ -139,7 +140,7 @@ rule "AllocationPool mirrors ProvisionPool increases"
 		modify($a) {
 			setQuantity($pq);
 		}
-end
+end*/
 
 rule "Accumulate Provisions"
 	salience 10
@@ -163,12 +164,11 @@ rule "Process Demand"
 		$r : Round( type == RoundType.DEMAND, $t : number )
 		$c : Cluster( )
 		$pool : MinimumPool( cluster == $c )
-		$d : Demand( this coincides $r, $p : player, $q : quantity, $tot : total, $dead :deadline, $charD : charDeadline)
+		$d : Demand( this coincides $r, $p : player, $q : quantity, $dead :deadline, $charD : charDeadline)
 		not( Processed( $d ;) )
 	then
 		modify($p) {
 			setD($q),
-			setTotalDemanded($tot),
 			setDeadlineSpecified($dead),
 			setCharDeadline($charD);
 		}
@@ -293,9 +293,9 @@ rule "Surplus allocated pool"
 		$a : AllocationPool($q: quantity )
 		not( Processed( $a ;) )
 	then
-		logger.info($q +" pool surplus");
+		logger.info($q +" allocPoolSurplus");
         if (storage != null) {
-            storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-poolSurplus",
+            storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-allocPoolSurplus",
                     $r.getNumber(),
                     Double.toString($q)
                     );
