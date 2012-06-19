@@ -96,11 +96,12 @@ public class EVPoolPlayer extends AbstractParticipant {
             if (game.getRoundNumber() == game.getArrivalRound(getID())+1) {
                 batteryCap = game.getBatteryCap(getID());
                 maxChargeRate = game.getMaxChargeRate(getID());
+                maxChargePointRate = cluster.getChargePointRate();
 
             } else {
                 storeData();
             }
-            maxChargePointRate = cluster.getChargePointRate();
+
             chargeLevel = game.getChargeLevel(getID());
 
             double totalDemand = Math.max(batteryCap - chargeLevel, 0);

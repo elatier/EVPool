@@ -339,7 +339,7 @@ rule "Store round gridLoad"
         }
 end
 
-rule "Calculate round chDeadUnmet"
+rule "Calculate round chDeadUnmet and agentCount"
 	salience -99
 	when
 		$r : Round( type == RoundType.DEMAND, $t : number )
@@ -351,6 +351,12 @@ rule "Calculate round chDeadUnmet"
             $minSlots: sum( 1 )
         )
 	then
+        if (storage != null) {
+            storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-agentCount",
+                    $r.getNumber(),
+                    Double.toString($members.size())
+                    );
+        };
         if (storage != null) {
             storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-chDeadUnmet",
                     $t,

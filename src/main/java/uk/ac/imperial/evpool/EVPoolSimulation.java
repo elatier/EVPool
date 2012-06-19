@@ -147,7 +147,7 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
             //depart from 8 randomly, or
             int evDepartureRound = (int) (20/timeStepHour) + (int) Math.round((1/timeStepHour) * normal.nextDouble());
             //initial capacity random from 20% to 90%
-            double initialCapacity =  Math.round(batteryCap*0.9 - Random.randomDouble() * (batteryCap * 0.7)) ;
+            double initialCapacity =  batteryCap*0.9 - Random.randomDouble() * (batteryCap * 0.7);
 
 			s.addParticipant(new EVPoolPlayer(pid, "c" + n, evDepartureRound,gridLoad));
 			Player p = new Player(pid, "c" + n, "C", batteryCap, initialCapacity, maxChargeRate, arrivalRound, c);
