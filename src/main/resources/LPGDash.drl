@@ -67,7 +67,7 @@ declare AllocationPool
 	quantity: double
 end
 
-declare AllocatedPool
+declare MaximumPool
 	cluster: Cluster @key
 	quantity: double
 end
@@ -131,16 +131,14 @@ rule "Init Allocation Pool"
 		insert(new AllocationPool( $c, 0 ) );
 end
 
-/*rule "AllocationPool mirrors ProvisionPool increases"
+rule "Init Maximum Pool"
+    salience 15
 	when
 		$c : Cluster( )
-		$p : ProvisionPool( cluster == $c, $pq : quantity )
-		$a : AllocationPool( cluster == $c, $aq : quantity, quantity < $pq )
+		not( MaximumPool( cluster == $c ) )
 	then
-		modify($a) {
-			setQuantity($pq);
-		}
-end*/
+		insert(new MaximumPool( $c, 0 ) );
+end
 
 rule "Accumulate Provisions"
 	salience 10
@@ -164,6 +162,7 @@ rule "Process Demand"
 		$r : Round( type == RoundType.DEMAND, $t : number )
 		$c : Cluster( )
 		$pool : MinimumPool( cluster == $c )
+		$mPool : MaximumPool( cluster == $c )
 		$d : Demand( this coincides $r, $p : player, $q : quantity, $dead :deadline, $charD : charDeadline)
 		not( Processed( $d ;) )
 	then
@@ -172,7 +171,9 @@ rule "Process Demand"
 			setDeadlineSpecified($dead),
 			setCharDeadline($charD);
 		}
-
+        modify($mPool) {
+            setQuantity($mPool.getQuantity() + $q);
+        }
         if ($charD <= $t)  {
             //logger.debug("Charge dead: "+$charD+ "round num"+$t);
             modify($pool) {
@@ -307,7 +308,7 @@ rule "Surplus allocated pool"
 end
 
 rule "Calculate round totalDemand"
-	salience -99
+	salience 5
 	when
 		$r : Round( type == RoundType.DEMAND, $t : number )
 		$c : Cluster( )

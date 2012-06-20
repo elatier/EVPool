@@ -13,7 +13,6 @@ import org.drools.runtime.StatefulKnowledgeSession;
 
 import uk.ac.imperial.evpool.actions.EVPoolActionHandler;
 import uk.ac.imperial.evpool.actions.JoinCluster;
-import uk.ac.imperial.evpool.db.CSVImport;
 import uk.ac.imperial.evpool.facts.Allocation;
 import uk.ac.imperial.evpool.facts.Cluster;
 import uk.ac.imperial.evpool.facts.Player;
@@ -71,6 +70,9 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
     @Parameter(name = "gridLoadFilename")
     public String gridLoadFilename;
 
+    @Parameter(name = "usageSteepness")
+    public double usageSteepness;
+
     public EVPoolSimulation(Set<AbstractModule> modules) {
 		super(modules);
     }
@@ -98,10 +100,7 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 				.setStorage(RuleStorage.class)
 				 );
 		modules.add(new RuleModule().addClasspathDrlFile("LPGDash.drl")
-                //.addClasspathDrlFile("RationAllocation.drl")
-                .addClasspathDrlFile("RandomAllocation.drl")
-                .addClasspathDrlFile("NeedBasedAllocation.drl")
-                        //.addClasspathDrlFile("LegitimateClaimsAllocation.drl")
+                .addClasspathDrlFile("ResourceAllocation.drl")
                 .addStateTranslator(SimParticipantsTranslator.class));
 		modules.add(NetworkModule.noNetworkModule());
 		return modules;
@@ -127,6 +126,7 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 		session.setGlobal("storage", this.storage);
         session.setGlobal("gridLoad", gridLoad);
         session.setGlobal("loadLevel", loadLevel);
+        session.setGlobal("usageSteepness", usageSteepness);
         session.setGlobal("maxChargePointRate", maxChargePointRate);
 
         Allocation c0All = Allocation.RANDOM;
@@ -136,6 +136,10 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 				break;
 			}
 		}
+
+
+
+
 
         Cluster c = new Cluster(0, c0All, maxChargePointRate);
         session.insert(c);

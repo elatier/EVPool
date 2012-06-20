@@ -67,14 +67,6 @@ public class EVPoolPlayer extends AbstractParticipant {
 		} catch (UnavailableServiceException e) {
 			logger.warn("Couldn't get environment service", e);
 		}
-		if (this.persist != null) {
-			/*this.persist.setProperty("headProvision", Double.toString(this.headProvision));
-			this.persist.setProperty("a", Double.toString(this.a));
-			this.persist.setProperty("b", Double.toString(this.b));
-			this.persist.setProperty("c", Double.toString(this.c));*/
-			//this.persist.setProperty("alpha", Double.toString(this.alpha));
-			//this.persist.setProperty("beta", Double.toString(this.beta));
-		}
 	}
 
 	@Override
@@ -109,17 +101,17 @@ public class EVPoolPlayer extends AbstractParticipant {
                     Math.min(maxChargePointRate, maxChargeRate)
                     );
             double totalDemandInTurns = Math.ceil(totalDemand / Math.min(maxChargePointRate, maxChargeRate));
-            int chargingDeadline = 0;
-            //if (totalDemandInTurns != 0.0) {
+            int chargingDeadline = 999;
+            if (totalDemandInTurns != 0.0) {
                 chargingDeadline = (int) (departureRound - totalDemandInTurns);
-            //}
+            }
 
             if (game.getRole(getID()) == Role.HEAD) {
-                double roundGridLoad = gridLoad.get(game.getRoundNumber());
-                double loadMax = gridLoad.get(-1);
-                double loadMin = gridLoad.get(-2);
-                double fractionOfMaxLoad = 1.0 -((roundGridLoad - loadMin)/(loadMax-loadMin));
-                //provision(headProvision*fractionOfMaxLoad);
+//                double roundGridLoad = gridLoad.get(game.getRoundNumber());
+//                double loadMax = gridLoad.get(-1);
+//                double loadMin = gridLoad.get(-2);
+//                double fractionOfMaxLoad = 1.0 -((roundGridLoad - loadMin)/(loadMax-loadMin));
+//                //provision(headProvision*fractionOfMaxLoad);
 
             }   else {
                 // provision(0);
@@ -151,11 +143,6 @@ public class EVPoolPlayer extends AbstractParticipant {
 
 	protected void demand(double d, int deadline, int chargingDeadline) {
 		try {
-            /*if ((total == 0.0) && (total==this.roundsToCharge) && (d==this.d) && (this.d==0.0))
-            {
-                //skip demand if same as last round
-                return;
-            } */
 			environment.act(new Demand(d, deadline, chargingDeadline), getID(), authkey);
 			this.d = d;
             this.specifiedDeadline = deadline;
@@ -176,11 +163,6 @@ public class EVPoolPlayer extends AbstractParticipant {
 
 	protected void appropriate(double r) {
 		try {
-            if ((r == 0.0) && (r==this.toAppropriate))
-            {
-                //skip appropriate if 0.0
-                return;
-            }
             this.toAppropriate = r;
 			environment.act(new Appropriate(r), getID(), authkey);
 		} catch (ActionHandlingException e) {

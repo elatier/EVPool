@@ -29,8 +29,10 @@ public class RationAllocator {
 			}
 		});
 		for (Player p : players) {
-			//double toAllocate = Math.min(allocation, p.getD());
-			session.insert(new Allocate(p, allocation, t));
+            logger.debug("Comparison: D=:"+p.getD()+"allocation:"+allocation);
+            //logger.debug("Comparison: deadlineTurn=:"+(p.getDeadlineSpecified()-p.getTotalDemanded()));
+			double toAllocate = Math.min(allocation, p.getD());
+			session.insert(new Allocate(p, toAllocate, t));
 			//playerCtr--;
 			//poolSize -= toAllocate;
 			//allocation = poolSize / playerCtr;

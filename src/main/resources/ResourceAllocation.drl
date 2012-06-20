@@ -3,8 +3,7 @@ package uk.ac.imperial.evpool
 import java.util.List
 import java.util.ArrayList
 
-import uk.ac.imperial.evpool.allocators.NeedBasedAllocator
-import uk.ac.imperial.evpool.ProvisionPool
+import uk.ac.imperial.evpool.allocators.*
 import uk.ac.imperial.evpool.actions.*
 import uk.ac.imperial.evpool.facts.*
 import uk.ac.imperial.evpool.RoundType
@@ -15,41 +14,48 @@ global org.drools.runtime.StatefulKnowledgeSession session
 global Map<Integer,Double> gridLoad
 global Double maxChargePointRate
 global Double loadLevel
+global Double usageSteepness
 
-
-rule "Need based resource allocation"
+rule "Resource allocation"
 	no-loop
 	when
 		$r : Round( type == RoundType.DEMAND, $t : number )
-		$c : Cluster( allocationMethod == Allocation.NEED_BASED )
+		$c : Cluster( $alloc: allocationMethod )
 		$aPool : AllocationPool( cluster == $c)
 		$pool : ProvisionPool( cluster == $c )
 		$mPool : MinimumPool( cluster == $c )
+		$maxPool : MaximumPool( cluster == $c )
 		$poolMembers : List(size >= 0) from accumulate( MemberOf( cluster == $c, $p : player ), collectList( $p ) )
 	then
         double roundGridLoad = (Double) gridLoad.get($t);
         double loadMax = (Double) gridLoad.get(-1);
         double loadMin = (Double) gridLoad.get(-2);
-        double fractionOfMaxLoad = 1.0 -((roundGridLoad - loadMin)/(loadMax-loadMin));
+        double fractionOfMaxLoad = Math.pow((1.0 -((roundGridLoad - loadMin)/(loadMax-loadMin))),usageSteepness);
 
         Double ePool = 0.0; //external pool
 		Double headProvision = $poolMembers.size() * maxChargePointRate*loadLevel * fractionOfMaxLoad;
-		if (headProvision > $mPool.getQuantity()) {
-             ePool = headProvision - $pool.getQuantity();
-             logger.info("HeadProvision: "+headProvision+", Adding from outside grid:" +ePool);
-		}
-/*		else {
-		     ePool = $mPool.getQuantity() - $pool.getQuantity();
-             logger.info("MinimumPool: "+$mPool.getQuantity() + ", Adding from outside grid:" +ePool);
-		}*/
+		if (headProvision > $maxPool.getQuantity()) {
+		    headProvision =  $maxPool.getQuantity();
+		};
+/*        if (headProvision < $mPool.getQuantity()) {
+            headProvision =  $mPool.getQuantity();
+        };*/
+         ePool = headProvision - $pool.getQuantity();
+         logger.info("HeadProvision: "+headProvision+", Adding from outside grid:" +ePool);
+
         modify( $aPool ) {
             //allocation pool is made of provision and external pools
             setQuantity($pool.getQuantity()+ePool);
+        };
+        logger.info($alloc+" allocation " + $c + " using allocation pool: " + $aPool.getQuantity());
+
+        if ($alloc == Allocation.NEED_BASED ) {
+            NeedBasedAllocator.allocate(session, $poolMembers, $aPool.getQuantity(), $t );
+        }  else if ($alloc == Allocation.RANDOM ) {
+             RandomAllocator.allocate(session, $poolMembers, $aPool.getQuantity(), $t );
+        } else if ($alloc == Allocation.RATION ) {
+             RationAllocator.allocate(session, $poolMembers, $aPool.getQuantity(), $t );
         }
-        logger.info("NeedBased allocation " + $c + " using allocation pool: " + $aPool.getQuantity());
-        NeedBasedAllocator.allocate(session, $poolMembers, $aPool.getQuantity(), $t );
-
-
         if (storage != null) {
                     storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-intProvisionPool",
                     $r.getNumber(),
@@ -71,7 +77,7 @@ rule "Need based resource allocation"
         if (storage != null) {
             storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-extPool",
                     $r.getNumber(),
-                    Double.toString(ePool)
+                    Double.toString(roundGridLoad+ePool*6*10)
                     );
         };
         if (storage != null) {
@@ -85,5 +91,8 @@ rule "Need based resource allocation"
 		}
 		modify( $mPool ) {
         	setQuantity(0);
+        }
+        modify( $maxPool ) {
+            setQuantity(0);
         }
 end

@@ -22,7 +22,38 @@ rule "Random resource allocation"
 	then
 		logger.info("Random order for resources " + $c);
 		RandomAllocator.allocate(session, $poolMembers, $pool.getQuantity(), $t );
+    if (storage != null) {
+    storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-intProvisionPool",
+    $r.getNumber(),
+    Double.toString($pool.getQuantity())
+    );
+    };
+    if (storage != null) {
+        storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-allocPool",
+                $r.getNumber(),
+                Double.toString($aPool.getQuantity())
+                );
+    }
+    if (storage != null) {
+        storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-minPool",
+                $r.getNumber(),
+                Double.toString($mPool.getQuantity())
+                );
+    };
+    if (storage != null) {
+        storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-extPool",
+                $r.getNumber(),
+                Double.toString(roundGridLoad+ePool*6*10)
+                );
+    };
+    if (storage != null) {
+        storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-headProvision",
+                $r.getNumber(),
+                Double.toString(headProvision)
+                );
+    };
 		modify( $pool ) {
 			setQuantity(0);
 		}
+
 end
