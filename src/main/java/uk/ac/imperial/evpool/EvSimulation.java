@@ -62,8 +62,8 @@ public class EvSimulation extends InjectedSimulation implements TimeDriven {
     @Parameter(name = "mCR")
     public double mCR;
 
-	@Parameter(name = "clusters")
-	public String clusters;
+	@Parameter(name = "allocM")
+	public String allocM;
 
 	@Parameter(name = "seed")
 	public int seed;
@@ -142,7 +142,7 @@ public class EvSimulation extends InjectedSimulation implements TimeDriven {
 
         Allocation clusterAlloc = Allocation.RANDOM;
 		for (Allocation a : Allocation.values()) {
-			if (clusters.equalsIgnoreCase(a.name())) {
+			if (allocM.equalsIgnoreCase(a.name())) {
 				clusterAlloc = a;
 				break;
 			}
