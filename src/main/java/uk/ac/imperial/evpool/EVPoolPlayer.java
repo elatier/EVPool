@@ -107,12 +107,7 @@ public class EVPoolPlayer extends AbstractParticipant {
             }
 
             if (game.getRole(getID()) == Role.HEAD) {
-//                double roundGridLoad = gridLoad.get(game.getRoundNumber());
-//                double loadMax = gridLoad.get(-1);
-//                double loadMin = gridLoad.get(-2);
-//                double fractionOfMaxLoad = 1.0 -((roundGridLoad - loadMin)/(loadMax-loadMin));
-//                //provision(headProvision*fractionOfMaxLoad);
-
+                  //
             }   else {
                 // provision(0);
             }

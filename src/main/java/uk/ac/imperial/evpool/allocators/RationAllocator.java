@@ -34,7 +34,7 @@ public class RationAllocator {
 			double toAllocate = Math.min(allocation, p.getD());
 			session.insert(new Allocate(p, toAllocate, t));
 			//playerCtr--;
-			//poolSize -= toAllocate;
+			//poolSize -= toAllocate;           p
 			//allocation = poolSize / playerCtr;
 		}
 	}
