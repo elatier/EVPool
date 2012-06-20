@@ -43,7 +43,7 @@ public class CSVImport {
                 int period = Integer.parseInt(elements[0]);
                 double load = Double.parseDouble(elements[1]);
                 int round;
-                // MOD((B31-30)*2,96)+1 - transform to round numbers from half hours
+                // MOD((B31-25)*2,96)+1 - transform to round numbers from half hours
                 if (period-roundStartPos < 0 )  {
                     round = (48*timeStepsInHalfHour-Math.abs(period - roundStartPos)*timeStepsInHalfHour)+1;
                 } else {

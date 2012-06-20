@@ -117,7 +117,7 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
         double maxChargeRate = mCR*timeStepHour;
        // double headProvision = cCount *loadLevel*maxChargePointRate;
 
-        Map<Integer,Double> gridLoad = importGridLoad(gridLoadFilename, 24, 2);
+        Map<Integer,Double> gridLoad = importGridLoad(gridLoadFilename, 25, 2);
 		Random.seed = this.seed;
 		s.addTimeDriven(this);
         //this.storage = null;
@@ -153,6 +153,7 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
             //initial capacity random from 20% to 90%
             double initialCapacity =  batteryCap*0.9 - Random.randomDouble() * (batteryCap * 0.7);
 
+
 /*            double totalDemand = Math.max(batteryCap - initialCapacity, 0);
             double roundDemand = Math.min(totalDemand,
                     Math.min(maxChargePointRate, maxChargeRate)
@@ -171,6 +172,8 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 			//session.insert(new Generate(p, game.getRoundNumber() + 1));
 		}
 	}
+
+
 
 	@Override
 	public void incrementTime() {

@@ -77,7 +77,7 @@ rule "Resource allocation"
         if (storage != null) {
             storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-extPool",
                     $r.getNumber(),
-                    Double.toString(roundGridLoad+ePool*6*10)
+                    Double.toString(ePool)
                     );
         };
         if (storage != null) {
