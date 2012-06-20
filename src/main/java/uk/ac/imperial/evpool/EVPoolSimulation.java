@@ -43,8 +43,15 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 	private Set<Player> players = new HashSet<Player>();
 	private EVPoolService game;
 
-	@Parameter(name = "cCount")
-	public int cCount;
+	@Parameter(name = "agentCount")
+	public int agentCount;
+
+    @Parameter(name = "minSOC")
+    public double minSOC;
+
+    @Parameter(name = "maxSOC")
+    public double maxSOC;
+
 
     @Parameter(name = "mCPR")
     public double mCPR;
@@ -110,7 +117,7 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 	protected void addToScenario(Scenario s) {
 
         RandomEngine engine = new MersenneTwister64(seed);
-        Normal normal = new Normal(0, 1, engine);
+        Normal normal = new Normal(0, 2, engine);
 
         double maxChargePointRate = mCPR*timeStepHour;
         double batteryCap = bC;
@@ -129,10 +136,10 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
         session.setGlobal("usageSteepness", usageSteepness);
         session.setGlobal("maxChargePointRate", maxChargePointRate);
 
-        Allocation c0All = Allocation.RANDOM;
+        Allocation clusterAlloc = Allocation.RANDOM;
 		for (Allocation a : Allocation.values()) {
 			if (clusters.equalsIgnoreCase(a.name())) {
-				c0All = a;
+				clusterAlloc = a;
 				break;
 			}
 		}
@@ -141,17 +148,17 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 
 
 
-        Cluster c = new Cluster(0, c0All, maxChargePointRate);
+        Cluster c = new Cluster(0, clusterAlloc, maxChargePointRate);
         session.insert(c);
 
-		for (int n = 0; n < cCount; n++) {
+		for (int n = 0; n < agentCount; n++) {
 			UUID pid = Random.randomUUID();
-            //time starts at 12:00pm, so round 1 is at 12:00, arrive home 18+-N(0,1)
+            //time starts at 12:00pm, so round 1 is at 12:00, arrive home 18+-N(0,2)
             int arrivalRound = (int) (6/timeStepHour) + (int) Math.round((1/timeStepHour) * normal.nextDouble());
             //depart from 8 randomly, or
             int evDepartureRound = (int) (20/timeStepHour) + (int) Math.round((1/timeStepHour) * normal.nextDouble());
-            //initial capacity random from 20% to 90%
-            double initialCapacity =  batteryCap*0.9 - Random.randomDouble() * (batteryCap * 0.7);
+            //initial capacity random from minSOC% to maxSOC%
+            double initialCapacity =  batteryCap*maxSOC - Random.randomDouble() * (batteryCap * (maxSOC-minSOC));
 
 
 /*            double totalDemand = Math.max(batteryCap - initialCapacity, 0);
@@ -168,8 +175,6 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 			Player p = new Player(pid, "c" + n, "C", batteryCap, initialCapacity, maxChargeRate, arrivalRound, c);
 			players.add(p);
 			session.insert(p);
-			//session.insert(new JoinCluster(p, c));
-			//session.insert(new Generate(p, game.getRoundNumber() + 1));
 		}
 	}
 
