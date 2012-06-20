@@ -15,7 +15,7 @@ public class NeedBasedAllocator {
     private static final Logger logger = Logger
             .getLogger("uk.ac.imperial.evpool.NeedBasedAllocator");
 
-    public static Comparator<Player> COMPARE_BY_TOTAL_DEMANDED_AND_DEADLINE = new Comparator<Player>() {
+    public static Comparator<Player> COMPARE_BY_CHAR_DEADLINE = new Comparator<Player>() {
         public int compare(Player one, Player other) {
             if (one.getCharDeadline() <  other.getCharDeadline()) {
                 return -1;
@@ -31,7 +31,7 @@ public class NeedBasedAllocator {
 	public static void allocate(StatefulKnowledgeSession session,
                                      List<Player> players, double poolSize, int t) {
         players = new ArrayList<Player>(players);
-        Collections.sort(players, COMPARE_BY_TOTAL_DEMANDED_AND_DEADLINE);
+        Collections.sort(players, COMPARE_BY_CHAR_DEADLINE);
         for (Player p : players) {
             //logger.debug("Comparison: totalD=:"+p.getTotalDemanded()+" deadline="+p.getDeadlineSpecified());
             //logger.debug("Comparison: deadlineTurn=:"+(p.getDeadlineSpecified()-p.getTotalDemanded()));

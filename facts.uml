@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>uk.ac.imperial.evpool.facts</OriginalElement>
+  <nodes>
+    <node x="473.8168604651162" y="144.74127906976753">uk.ac.imperial.evpool.facts.MemberOf</node>
+    <node x="0.0" y="0.0">uk.ac.imperial.evpool.facts.Player</node>
+    <node x="272.8808139534884" y="131.2267441860465">uk.ac.imperial.evpool.facts.Allocation</node>
+    <node x="272.5058139534883" y="11.212209302325569">uk.ac.imperial.evpool.facts.Cluster</node>
+    <node x="273.6191860465116" y="254.8575581395349">uk.ac.imperial.evpool.facts.Role</node>
+    <node x="454.57848837209326" y="257.3488372093023">uk.ac.imperial.evpool.facts.Round</node>
+  </nodes>
+  <notes />
+  <edges />
+  <settings layout="Hierarchic Group" zoom="0.9052631578947369" x="302.0" y="180.0" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Fields</Category>
+    <Category>Inner Classes</Category>
+    <Category>Properties</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>public</VISIBILITY>
+</Diagram>
+

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>uk.ac.imperial.evpool.actions</OriginalElement>
+  <nodes>
+    <node x="0.0" y="248.0">uk.ac.imperial.evpool.actions.Provision</node>
+    <node x="314.0" y="113.0">uk.ac.imperial.evpool.actions.PlayerAction</node>
+    <node x="310.0" y="248.0">uk.ac.imperial.evpool.actions.JoinCluster</node>
+    <node x="619.0" y="226.0">uk.ac.imperial.evpool.actions.Demand</node>
+    <node x="160.0" y="248.0">uk.ac.imperial.evpool.actions.LeaveCluster</node>
+    <node x="460.0" y="248.0">uk.ac.imperial.evpool.actions.Appropriate</node>
+    <node x="456.0" y="102.0">uk.ac.imperial.evpool.actions.Allocate</node>
+    <node x="377.25" y="0.0">uk.ac.imperial.evpool.actions.TimestampedAction</node>
+    <node x="110.0" y="130.0">uk.ac.imperial.evpool.actions.EvActionHandler</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="uk.ac.imperial.evpool.actions.LeaveCluster" target="uk.ac.imperial.evpool.actions.PlayerAction">
+      <point x="0.0" y="-26.0" />
+      <point x="225.0" y="206.0" />
+      <point x="350.6" y="206.0" />
+      <point x="-24.399999999999977" y="26.0" />
+    </edge>
+    <edge source="uk.ac.imperial.evpool.actions.Appropriate" target="uk.ac.imperial.evpool.actions.PlayerAction">
+      <point x="0.0" y="-26.0" />
+      <point x="529.5" y="206.0" />
+      <point x="399.4" y="206.0" />
+      <point x="24.399999999999977" y="26.0" />
+    </edge>
+    <edge source="uk.ac.imperial.evpool.actions.JoinCluster" target="uk.ac.imperial.evpool.actions.PlayerAction">
+      <point x="0.0" y="-26.0" />
+      <point x="0.0" y="26.0" />
+    </edge>
+    <edge source="uk.ac.imperial.evpool.actions.Provision" target="uk.ac.imperial.evpool.actions.PlayerAction">
+      <point x="0.0" y="-26.0" />
+      <point x="70.0" y="196.0" />
+      <point x="326.2" y="196.0" />
+      <point x="-48.80000000000001" y="26.0" />
+    </edge>
+    <edge source="uk.ac.imperial.evpool.actions.PlayerAction" target="uk.ac.imperial.evpool.actions.TimestampedAction">
+      <point x="0.0" y="-26.0" />
+      <point x="375.0" y="77.0" />
+      <point x="413.75" y="77.0" />
+      <point x="-36.5" y="26.0" />
+    </edge>
+    <edge source="uk.ac.imperial.evpool.actions.Demand" target="uk.ac.imperial.evpool.actions.PlayerAction">
+      <point x="0.0" y="-48.0" />
+      <point x="689.5" y="196.0" />
+      <point x="423.8" y="196.0" />
+      <point x="48.80000000000001" y="26.0" />
+    </edge>
+    <edge source="uk.ac.imperial.evpool.actions.Allocate" target="uk.ac.imperial.evpool.actions.TimestampedAction">
+      <point x="0.0" y="-37.0" />
+      <point x="525.5" y="77.0" />
+      <point x="486.75" y="77.0" />
+      <point x="36.5" y="26.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="380.0" y="198.5" />
+  <SelectedNodes>
+    <node>uk.ac.imperial.evpool.actions.EvActionHandler</node>
+  </SelectedNodes>
+  <Categories>
+    <Category>Fields</Category>
+    <Category>Properties</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>public</VISIBILITY>
+</Diagram>
+

@@ -7,7 +7,6 @@ import uk.ac.imperial.evpool.allocators.*
 import uk.ac.imperial.evpool.actions.*
 import uk.ac.imperial.evpool.facts.*
 import uk.ac.imperial.evpool.RoundType
-import uk.ac.imperial.presage2.db.sql.Environment
 
 global org.apache.log4j.Logger logger
 global org.drools.runtime.StatefulKnowledgeSession session
@@ -55,36 +54,18 @@ rule "Resource allocation"
              RandomAllocator.allocate(session, $poolMembers, $aPool.getQuantity(), $t );
         } else if ($alloc == Allocation.RATION ) {
              RationAllocator.allocate(session, $poolMembers, $aPool.getQuantity(), $t );
-        }
-        if (storage != null) {
-                    storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-intProvisionPool",
-                    $r.getNumber(),
-                    Double.toString($pool.getQuantity())
-                    );
         };
         if (storage != null) {
+            storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-intProvisionPool",
+                    $t,Double.toString($pool.getQuantity()));
             storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-allocPool",
-                    $r.getNumber(),
-                    Double.toString($aPool.getQuantity())
-                    );
-        }
-        if (storage != null) {
+                    $t, Double.toString($aPool.getQuantity()));
             storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-minPool",
-                    $r.getNumber(),
-                    Double.toString($mPool.getQuantity())
-                    );
-        };
-        if (storage != null) {
+                    $t,Double.toString($mPool.getQuantity()));
             storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-extPool",
-                    $r.getNumber(),
-                    Double.toString(ePool)
-                    );
-        };
-        if (storage != null) {
+                    $t,Double.toString(ePool));
             storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-headProvision",
-                    $r.getNumber(),
-                    Double.toString(headProvision)
-                    );
+                    $t,Double.toString(headProvision));
         };
 		modify( $pool ) {
 			setQuantity(0);

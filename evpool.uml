@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>uk.ac.imperial.evpool</OriginalElement>
+  <nodes>
+    <node x="316.5901162790699" y="296.813953488372">uk.ac.imperial.evpool.facts</node>
+    <node x="310.9709302325581" y="247.47674418604646">uk.ac.imperial.evpool.actions</node>
+    <node x="312.8575581395347" y="89.37499999999994">uk.ac.imperial.evpool.RoundType</node>
+    <node x="47.83139534883725" y="352.453488372093">uk.ac.imperial.evpool.EvPlayer</node>
+    <node x="326.2296511627907" y="345.98837209302326">uk.ac.imperial.evpool.io</node>
+    <node x="3.828488372093034" y="5.104651162790702">uk.ac.imperial.evpool.EvSimulation</node>
+    <node x="332.7209302325582" y="2.078488372093066">uk.ac.imperial.evpool.EvEnvService</node>
+    <node x="149.0" y="352.0">uk.ac.imperial.evpool.GenPlayer</node>
+    <node x="306.9476744186047" y="204.0843023255814">uk.ac.imperial.evpool.allocators</node>
+  </nodes>
+  <notes />
+  <edges />
+  <settings layout="Hierarchic Group" zoom="0.85785536159601" x="259.0" y="192.5" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Fields</Category>
+    <Category>Properties</Category>
+    <Category>Inner Classes</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>public</VISIBILITY>
+</Diagram>
+

@@ -1,0 +1,72 @@
+package uk.ac.imperial.evpool
+
+import java.util.List
+import java.util.Map
+import java.lang.Math
+import java.lang.Double
+import uk.ac.imperial.presage2.core.Action
+import uk.ac.imperial.presage2.rules.facts.Agent
+import uk.ac.imperial.evpool.RoundType
+import uk.ac.imperial.evpool.actions.*
+import uk.ac.imperial.evpool.facts.*
+import uk.ac.imperial.presage2.core.db.StorageService
+import uk.ac.imperial.presage2.core.util.random.Random
+import uk.ac.imperial.evpool.rules.*
+
+global org.apache.log4j.Logger logger
+global uk.ac.imperial.presage2.core.db.StorageService storage
+
+
+declare IsHead
+	@role( event )
+	player : Player		@key
+	cluster : Cluster	@key
+	time : int 			@key
+end
+
+rule "Assign cluster head"
+	salience -1
+	no-loop
+	when
+		$c : Cluster( )
+		$members : List(size > 0) from accumulate(
+			$p : Player( ) and
+			MemberOf( cluster == $c, player == $p )
+			, collectList( $p )
+		)
+		not( exists( Player( role == Role.HEAD ) from $members ) )
+	then
+		Player randomMember =  (Player) $members.get( Random.randomInt( $members.size() ) );
+		logger.info("New head: "+ randomMember);
+		randomMember.setRole( Role.HEAD );
+
+end
+
+rule "Cluster head event"
+	no-loop
+	salience -2
+	when
+		Round( type == RoundType.DEMAND, $t : number )
+		$p : Player( role == Role.HEAD )
+		$c : Cluster( )
+		MemberOf( player == $p, cluster == $c )
+		not( IsHead( player == $p, cluster == $c, time == $t ) )
+	then
+		IsHead e = new IsHead( $p, $c, $t );
+		logger.info(e);
+		insert( e );
+end
+
+
+rule "Unassign cluster head after 20 rounds"
+	when
+		$p : Player( role == Role.HEAD )
+		$h : List( size > 0, size % 20 == 0 ) from collect( IsHead( player == $p ) over window:time( 50s ) )
+	then
+		modify($p) {
+			setRole( Role.PROSUMER )
+		}
+		logger.info("No longer cluster head: "+ $p );
+end
+
+

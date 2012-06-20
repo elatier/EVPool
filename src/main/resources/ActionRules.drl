@@ -1,0 +1,117 @@
+package uk.ac.imperial.evpool
+
+import java.util.List
+import java.util.Map
+import java.lang.Math
+import java.lang.Double
+import uk.ac.imperial.presage2.core.Action
+import uk.ac.imperial.presage2.rules.facts.Agent
+import uk.ac.imperial.evpool.RoundType
+import uk.ac.imperial.evpool.actions.*
+import uk.ac.imperial.evpool.facts.*
+import uk.ac.imperial.presage2.core.db.StorageService
+import uk.ac.imperial.presage2.core.util.random.Random
+import uk.ac.imperial.evpool.rules.*
+import uk.ac.imperial.evpool.rules.ProvisionPool.*
+global org.apache.log4j.Logger logger
+global uk.ac.imperial.presage2.core.db.StorageService storage
+
+rule "Process Demand and Update MinPool"
+	salience 10
+	when
+		$r : Round( type == RoundType.DEMAND, $t : number )
+		$c : Cluster( )
+		$pool : MinimumPool( cluster == $c )
+		$mPool : MaximumPool( cluster == $c )
+		$d : Demand( this coincides $r, $p : player, $q : quantity, $dead :deadline, $charD : charDeadline)
+		not( Processed( $d ;) )
+	then
+		modify($p) {
+			setD($q),
+			setDeadlineSpecified($dead),
+			setCharDeadline($charD);
+		}
+        modify($mPool) {
+            setQuantity($mPool.getQuantity() + $q);
+        }
+        if ($charD <= $t)  {
+            //logger.debug("Charge dead: "+$charD+ "round num"+$t);
+            modify($pool) {
+                setQuantity($pool.getQuantity() + $q);
+            }
+        }
+		insert( new Processed( $d ) );
+		logger.info($d);
+end
+
+rule "Accumulate Provisions"
+	salience 10
+    when
+		$r : Round( type == RoundType.DEMAND )
+		$c : Cluster( )
+		$provision : Provision( this coincides $r )
+		$pool : ProvisionPool( cluster == $c )
+		not( Processed( $provision ;) )
+    then
+    	modify($pool) {
+    		setQuantity($pool.getQuantity() + $provision.getQuantity());
+    	}
+    	insert( new Processed( $provision ) );
+        logger.info( $provision  +" is now "+ $pool);
+end
+
+
+rule "Process Allocations"
+	when
+		$a : Allocate( $p : player, $q : quantity )
+		not Processed( $a ;)
+	then
+		logger.info("Processing allocation: "+ $a );
+		modify($p) {
+			setAllocated($q);
+		}
+		insert( new Processed( $a ) );
+end
+
+rule "Process Appropriate"
+	salience -5
+	when
+		$a : Appropriate( $player : player, $q : quantity )
+		not Processed( $a ;)
+		MemberOf( player == $player, $c : cluster )
+		$pool : AllocationPool( cluster == $c )
+	then
+		double canTake = Math.min( $pool.getQuantity(), $q );
+		modify($player) {
+			setAppropriated(canTake),
+			chargeBattery(canTake);
+		}
+		modify($pool) {
+			setQuantity( $pool.getQuantity() - canTake );
+		}
+		insert( new Processed( $a ) );
+		logger.info("Processing appropriate: "+ $a);
+end
+
+rule "Join cluster"
+	when
+		$j : JoinCluster( $c : cluster, $p : player )
+		not MemberOf( player == $p )
+		not Processed( $j ;)
+	then
+		insert( new MemberOf( $p, $c ) );
+		insert( new Processed( $j ) );
+		logger.info("Joined "+ $c+ ": "+ $p );
+end
+
+rule "Leave cluster"
+    salience 5
+	when
+		$a : LeaveCluster( $c : cluster, $p : player )
+		$m : MemberOf( cluster == $c, player == $p )
+		not Processed( $a ;)
+	then
+		retract( $m );
+		insert( new Processed( $a ) );
+		logger.info("Left cluster: "+ $p.getName() );
+end

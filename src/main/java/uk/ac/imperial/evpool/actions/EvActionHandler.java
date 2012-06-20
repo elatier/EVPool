@@ -6,13 +6,12 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
-import org.apache.log4j.Priority;
 import org.drools.runtime.ObjectFilter;
 import org.drools.runtime.StatefulKnowledgeSession;
 
 import com.google.inject.Inject;
 
-import uk.ac.imperial.evpool.EVPoolService;
+import uk.ac.imperial.evpool.EvEnvService;
 import uk.ac.imperial.evpool.facts.Player;
 import uk.ac.imperial.presage2.core.Action;
 import uk.ac.imperial.presage2.core.environment.ActionHandler;
@@ -21,32 +20,32 @@ import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
 
-public class EVPoolActionHandler implements ActionHandler {
+public class EvActionHandler implements ActionHandler {
 
-	final private Logger logger = Logger.getLogger(EVPoolActionHandler.class);
+	final private Logger logger = Logger.getLogger(EvActionHandler.class);
 	final StatefulKnowledgeSession session;
 	Map<UUID, Player> players = new HashMap<UUID, Player>();
 	final EnvironmentServiceProvider serviceProvider;
-	EVPoolService lpgservice = null;
+	EvEnvService evService = null;
 
 	@Inject
-	public EVPoolActionHandler(StatefulKnowledgeSession session,
-                               EnvironmentServiceProvider serviceProvider)
+	public EvActionHandler(StatefulKnowledgeSession session,
+                           EnvironmentServiceProvider serviceProvider)
 			throws UnavailableServiceException {
 		super();
 		this.session = session;
 		this.serviceProvider = serviceProvider;
 	}
 
-	EVPoolService getLPGService() {
-		if (this.lpgservice == null) {
+	EvEnvService getEvService() {
+		if (this.evService == null) {
 			try {
-				this.lpgservice = serviceProvider.getEnvironmentService(EVPoolService.class);
+				this.evService = serviceProvider.getEnvironmentService(EvEnvService.class);
 			} catch (UnavailableServiceException e) {
-				logger.warn("Could not get lpg service", e);
+				logger.warn("Could not get ev service", e);
 			}
 		}
-		return this.lpgservice;
+		return this.evService;
 	}
 
 	@Override
@@ -79,7 +78,7 @@ public class EVPoolActionHandler implements ActionHandler {
 			((PlayerAction) action).setPlayer(p);
 		}
 		if (action instanceof TimestampedAction) {
-			((TimestampedAction) action).setT(getLPGService().getRoundNumber());
+			((TimestampedAction) action).setT(getEvService().getRoundNumber());
 		}
 		session.insert(action);
 		logger.debug("Handling: " + action);

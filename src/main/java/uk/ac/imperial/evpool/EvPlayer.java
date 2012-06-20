@@ -18,7 +18,7 @@ import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.core.messaging.Input;
 import uk.ac.imperial.presage2.util.participant.AbstractParticipant;
 
-public class EVPoolPlayer extends AbstractParticipant {
+public class EvPlayer extends AbstractParticipant {
 
     double batteryCap = 0;   //  full charge capacity
     double chargeLevel = 0;  // current charge level (units of charge)
@@ -36,18 +36,18 @@ public class EVPoolPlayer extends AbstractParticipant {
 
 	Cluster cluster = null;
 
-	protected EVPoolService game;
+	protected EvEnvService game;
 
     private static final Logger logger = Logger
-            .getLogger("uk.ac.imperial.evpool.EVPoolPlayer");
+            .getLogger("uk.ac.imperial.evpool.EvPlayer");
     private Map<Integer,Double> gridLoad;
 
 
-    public EVPoolPlayer(UUID id, String name) {
+    public EvPlayer(UUID id, String name) {
 		super(id, name);
 	}
 
-	public EVPoolPlayer(UUID id, String name, int departureRound, Map<Integer,Double> gridLoad) {
+	public EvPlayer(UUID id, String name, int departureRound) {
 		super(id, name);
         this.departureRound = departureRound;
         this.gridLoad = gridLoad;
@@ -63,7 +63,7 @@ public class EVPoolPlayer extends AbstractParticipant {
 	public void initialise() {
 		super.initialise();
 		try {
-			this.game = this.getEnvironmentService(EVPoolService.class);
+			this.game = this.getEnvironmentService(EvEnvService.class);
 		} catch (UnavailableServiceException e) {
 			logger.warn("Couldn't get environment service", e);
 		}
@@ -83,25 +83,26 @@ public class EVPoolPlayer extends AbstractParticipant {
         if (this.cluster == null) {
 			return;
 		}
-
 		if (game.getRound() == RoundType.DEMAND) {
             if (game.getRoundNumber() == game.getArrivalRound(getID())+1) {
-                batteryCap = game.getBatteryCap(getID());
-                maxChargeRate = game.getMaxChargeRate(getID());
-                maxChargePointRate = cluster.getChargePointRate();
-
+                   //initial round
             } else {
                 storeData();
             }
 
+            batteryCap = game.getBatteryCap(getID());
+            maxChargeRate = game.getMaxChargeRate(getID());
+            maxChargePointRate = cluster.getChargePointRate();
             chargeLevel = game.getChargeLevel(getID());
 
             double totalDemand = Math.max(batteryCap - chargeLevel, 0);
             double roundDemand = Math.min(totalDemand,
                     Math.min(maxChargePointRate, maxChargeRate)
                     );
-            double totalDemandInTurns = Math.ceil(totalDemand / Math.min(maxChargePointRate, maxChargeRate));
-            int chargingDeadline = 999;
+            double totalDemandInTurns = Math.ceil(totalDemand /
+                    Math.min(maxChargePointRate, maxChargeRate));
+
+            int chargingDeadline = Integer.MAX_VALUE;
             if (totalDemandInTurns != 0.0) {
                 chargingDeadline = (int) (departureRound - totalDemandInTurns);
             }
@@ -109,7 +110,7 @@ public class EVPoolPlayer extends AbstractParticipant {
             if (game.getRole(getID()) == Role.HEAD) {
                   //
             }   else {
-                // provision(0);
+                //provision(0);
             }
 
 			if ( game.getRoundNumber() == departureRound) {
@@ -117,7 +118,7 @@ public class EVPoolPlayer extends AbstractParticipant {
 				if (totalDemand > 0.0) {
                     leaveCluster();
                     logger.warn("Player " + this + " not charged at:"+ departureRound +", "+ totalDemand
-                            + " more was needed. "+"Charding deadline: " + chargingDeadline);
+                            + " more was needed. "+"Charging deadline: " + chargingDeadline);
                 }
                  else {
                     leaveCluster();
@@ -127,13 +128,11 @@ public class EVPoolPlayer extends AbstractParticipant {
 			}
             else
             {
-
                 demand(roundDemand,departureRound,chargingDeadline);
-
 			}
 		} else if (game.getRound() == RoundType.APPROPRIATE) {
 			    appropriate(game.getAllocated(getID()));
-         }
+        }
 	}
 
 	protected void demand(double d, int deadline, int chargingDeadline) {
@@ -188,41 +187,7 @@ public class EVPoolPlayer extends AbstractParticipant {
             state.setProperty("charDeadline", Double.toString(charDeadline));
             state.setProperty("r", Double.toString(r));
             state.setProperty("rP", Double.toString(rP));
-            //state.setProperty("cluster", "c" + this.cluster.getId());
         }
     }
 
-/*	protected void calculateScores() {
-		double r = game.getAllocated(getID());
-		double rP = game.getAppropriated(getID());
-		double rTotal = rP + (this.g - this.p);
-		double u = 0;
-		if (rTotal >= q)
-			u = a * q + b * (rTotal - q);
-		else
-			u = a * rTotal - c * (q - rTotal);
-
-		if (r >= d)
-			satisfaction = satisfaction + alpha * (1 - satisfaction);
-		else
-			satisfaction = satisfaction - beta * satisfaction;
-
-		logger.info("[g=" + g + ", q=" + q + ", d=" + d + ", p=" + p + ", r="
-				+ r + ", r'=" + rP + ", R=" + rTotal + ", U=" + u + ", o="
-				+ satisfaction + "]");
-
-		if (this.persist != null) {
-			TransientAgentState state = this.persist.getState(game.getRoundNumber()-1);
-			state.setProperty("g", Double.toString(g));
-			state.setProperty("q", Double.toString(q));
-			state.setProperty("d", Double.toString(d));
-			state.setProperty("p", Double.toString(p));
-			state.setProperty("r", Double.toString(r));
-			state.setProperty("r'", Double.toString(rP));
-			state.setProperty("RTotal", Double.toString(rTotal));
-			state.setProperty("U", Double.toString(u));
-			state.setProperty("o", Double.toString(satisfaction));
-			state.setProperty("cluster", "c" + this.cluster.getId());
-		}
-	}*/
 }

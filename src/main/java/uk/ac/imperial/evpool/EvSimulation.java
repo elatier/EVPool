@@ -11,7 +11,7 @@ import cern.jet.random.engine.MersenneTwister64;
 import org.apache.log4j.Logger;
 import org.drools.runtime.StatefulKnowledgeSession;
 
-import uk.ac.imperial.evpool.actions.EVPoolActionHandler;
+import uk.ac.imperial.evpool.actions.EvActionHandler;
 import uk.ac.imperial.evpool.actions.JoinCluster;
 import uk.ac.imperial.evpool.facts.Allocation;
 import uk.ac.imperial.evpool.facts.Cluster;
@@ -31,17 +31,17 @@ import uk.ac.imperial.presage2.util.network.NetworkModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 
-import static uk.ac.imperial.evpool.db.CSVImport.importGridLoad;
+import static uk.ac.imperial.evpool.io.CSVImport.importGridLoad;
 
 
-public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
+public class EvSimulation extends InjectedSimulation implements TimeDriven {
 
 	private final Logger logger = Logger
 			.getLogger("uk.ac.imperial.evpool.RuleEngine");
 	private StatefulKnowledgeSession session;
 
 	private Set<Player> players = new HashSet<Player>();
-	private EVPoolService game;
+	private EvEnvService game;
 
 	@Parameter(name = "agentCount")
 	public int agentCount;
@@ -80,7 +80,7 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
     @Parameter(name = "usageSteepness")
     public double usageSteepness;
 
-    public EVPoolSimulation(Set<AbstractModule> modules) {
+    public EvSimulation(Set<AbstractModule> modules) {
 		super(modules);
     }
 
@@ -92,7 +92,7 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 	@Inject
 	public void setServiceProvider(EnvironmentServiceProvider serviceProvider) {
 		try {
-			this.game = serviceProvider.getEnvironmentService(EVPoolService.class);
+			this.game = serviceProvider.getEnvironmentService(EvEnvService.class);
 		} catch (UnavailableServiceException e) {
 			logger.warn("", e);
 		}
@@ -102,12 +102,16 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
 	protected Set<AbstractModule> getModules() {
 		Set<AbstractModule> modules = new HashSet<AbstractModule>();
 		modules.add(new AbstractEnvironmentModule()
-				.addActionHandler(EVPoolActionHandler.class)
-				.addParticipantGlobalEnvironmentService(EVPoolService.class)
+				.addActionHandler(EvActionHandler.class)
+				.addParticipantGlobalEnvironmentService(EvEnvService.class)
 				.setStorage(RuleStorage.class)
 				 );
-		modules.add(new RuleModule().addClasspathDrlFile("LPGDash.drl")
+		modules.add(new RuleModule()
+                .addClasspathDrlFile("StorageRules.drl")
+                .addClasspathDrlFile("HeadRules.drl")
+                .addClasspathDrlFile("ActionRules.drl")
                 .addClasspathDrlFile("ResourceAllocation.drl")
+                .addClasspathDrlFile("LPGDash.drl")
                 .addStateTranslator(SimParticipantsTranslator.class));
 		modules.add(NetworkModule.noNetworkModule());
 		return modules;
@@ -171,7 +175,7 @@ public class EVPoolSimulation extends InjectedSimulation implements TimeDriven {
             arrivalRound += (int) ((chargingDeadline - arrivalRound) * Random.randomDouble());*/
 
 
-			s.addParticipant(new EVPoolPlayer(pid, "c" + n, evDepartureRound,gridLoad));
+			s.addParticipant(new EvPlayer(pid, "c" + n, evDepartureRound));
 			Player p = new Player(pid, "c" + n, "C", batteryCap, initialCapacity, maxChargeRate, arrivalRound, c);
 			players.add(p);
 			session.insert(p);

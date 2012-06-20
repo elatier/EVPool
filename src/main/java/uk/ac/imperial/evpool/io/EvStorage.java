@@ -1,9 +1,8 @@
-package uk.ac.imperial.evpool.db;
+package uk.ac.imperial.evpool.io;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,7 +10,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import uk.ac.imperial.evpool.EVPoolService;
+import uk.ac.imperial.evpool.EvEnvService;
 import uk.ac.imperial.presage2.core.environment.EnvironmentServiceProvider;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
 import uk.ac.imperial.presage2.db.sql.Agent;
@@ -21,23 +20,23 @@ import uk.ac.imperial.presage2.db.sql.SqlStorage;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
-public class EVPoolStorage extends SqlStorage {
+public class EvStorage extends SqlStorage {
 
 	int maxRound = -1;
 
 	boolean shutdown = false;
 
-	private EVPoolService game = null;
+	private EvEnvService game = null;
 
 	@Inject
-	public EVPoolStorage(@Named(value = "sql.info") Properties jdbcInfo) {
+	public EvStorage(@Named(value = "sql.info") Properties jdbcInfo) {
 		super(jdbcInfo);
 	}
 
 	@Inject(optional = true)
 	public void setGame(EnvironmentServiceProvider serviceProvider) {
 		try {
-			this.game = serviceProvider.getEnvironmentService(EVPoolService.class);
+			this.game = serviceProvider.getEnvironmentService(EvEnvService.class);
 		} catch (UnavailableServiceException e) {
 			throw new RuntimeException(e);
 		}

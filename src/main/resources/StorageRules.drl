@@ -1,0 +1,99 @@
+package uk.ac.imperial.evpool
+
+import java.util.List
+import java.util.Map
+import java.lang.Math
+import java.lang.Double
+import uk.ac.imperial.presage2.core.Action
+import uk.ac.imperial.presage2.rules.facts.Agent
+import uk.ac.imperial.evpool.RoundType
+import uk.ac.imperial.evpool.actions.*
+import uk.ac.imperial.evpool.facts.*
+import uk.ac.imperial.presage2.core.db.StorageService
+import uk.ac.imperial.presage2.core.util.random.Random
+import uk.ac.imperial.evpool.rules.*
+
+global org.apache.log4j.Logger logger
+global uk.ac.imperial.presage2.core.db.StorageService storage
+global Map<Integer,Double> gridLoad
+
+rule "Calculate round totalDemand"
+salience 5
+when
+    $r : Round( type == RoundType.DEMAND, $t : number )
+    $c : Cluster( )
+    $pool : ProvisionPool( cluster == $c )
+    $members : List(size > 0) from accumulate( MemberOf( cluster == $c, $p : player ), collectList( $p ) )
+    accumulate(
+           Demand( this coincides $r, player memberOf $members, $p : player, $d : quantity, quantity > 0),
+           $minSlots: sum( $d )  )
+then
+       if (storage != null) {
+           storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-totalDemand",
+                   $t,
+                   Double.toString($minSlots.doubleValue())
+                   );
+
+    }
+end
+
+rule "Store round gridLoad"
+salience -99
+when
+    $r : Round( type == RoundType.DEMAND, $t : number )
+   then
+       if (storage != null) {
+                 storage.getSimulation().getEnvironment().setProperty("gridLoad",
+                 $t,
+                 Double.toString((Double)gridLoad.get($t))
+           );
+       }
+end
+
+rule "Calculate round chDeadUnmet and agentCount"
+salience -99
+when
+    $r : Round( type == RoundType.DEMAND, $t : number )
+    $c : Cluster( )
+    $pool : ProvisionPool( cluster == $c )
+    $members : List(size > 0) from accumulate( MemberOf( cluster == $c, $p : player ), collectList( $p ) )
+    accumulate(
+           Demand( this coincides $r, player memberOf $members, $p : player, $d : quantity, quantity > 0, $cD: charDeadline, $cD < $t),
+           $minSlots: sum( 1 )
+       )
+then
+       if (storage != null) {
+           storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-agentCount",
+                   $r.getNumber(),
+                   Double.toString($members.size())
+                   );
+           storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-chDeadUnmet",
+                   $t,
+                   Double.toString($minSlots.doubleValue())
+                   );
+    }
+end
+
+
+rule "Surplus allocated pool"
+	salience -100
+	no-loop
+	when
+		$r : Round( type == RoundType.APPROPRIATE )
+		$c : Cluster( )
+		$a : AllocationPool($q: quantity )
+		not( Processed( $a ;) )
+	then
+		logger.info($q +" allocPoolSurplus");
+        if (storage != null) {
+            storage.getSimulation().getEnvironment().setProperty("c"+ $c.getId() +"-allocPoolSurplus",
+                    $r.getNumber(),
+                    Double.toString($q)
+                    );
+        }
+		modify($a) {
+			setQuantity(0);
+		}
+		insertLogical( new Processed( $a ) );
+end
+

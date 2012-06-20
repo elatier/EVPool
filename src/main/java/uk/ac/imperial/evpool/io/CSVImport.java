@@ -1,21 +1,18 @@
-package uk.ac.imperial.evpool.db;
+package uk.ac.imperial.evpool.io;
 
 import org.apache.log4j.Logger;
-import uk.ac.imperial.evpool.facts.Round;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 
 public class CSVImport {
 
     private static final Logger logger = Logger
-            .getLogger("uk.ac.imperial.evpool.db.CSVImport");
+            .getLogger("uk.ac.imperial.evpool.io.CSVImport");
 
 
     public static Map<Integer,Double> importGridLoad(String filename,int roundStartPos, int timeStepsInHalfHour) {

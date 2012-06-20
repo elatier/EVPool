@@ -25,7 +25,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 @Singleton
-public class EVPoolService extends EnvironmentService {
+public class EvEnvService extends EnvironmentService {
 
 	private final Logger logger = Logger.getLogger(this.getClass());
 	final StatefulKnowledgeSession session;
@@ -36,8 +36,8 @@ public class EVPoolService extends EnvironmentService {
 	int roundNumber = 0;
 
 	@Inject
-	protected EVPoolService(EnvironmentSharedStateAccess sharedState,
-                            StatefulKnowledgeSession session, EventBus eb) {
+	protected EvEnvService(EnvironmentSharedStateAccess sharedState,
+                           StatefulKnowledgeSession session, EventBus eb) {
 		super(sharedState);
 		this.session = session;
 		eb.subscribe(this);
