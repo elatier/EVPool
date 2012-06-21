@@ -136,7 +136,13 @@ public class EvPlayer extends AbstractParticipant {
 	}
 
 	protected void demand(double d, int deadline, int chargingDeadline) {
-		try {
+          if ( (d==this.d) && (this.d==0.0))
+          {
+               //skip demand if same as last round and zero
+               return;
+          }
+
+        try {
 			environment.act(new Demand(d, deadline, chargingDeadline), getID(), authkey);
 			this.d = d;
             this.specifiedDeadline = deadline;

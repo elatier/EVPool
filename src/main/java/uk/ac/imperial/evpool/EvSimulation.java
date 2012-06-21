@@ -120,13 +120,12 @@ public class EvSimulation extends InjectedSimulation implements TimeDriven {
 	@Override
 	protected void addToScenario(Scenario s) {
 
-        RandomEngine engine = new MersenneTwister64(seed);
-        Normal normal = new Normal(0, 2, engine);
+        Boolean useMinimumPool = true;
+        Boolean randomChargingStart = false;
 
         double maxChargePointRate = mCPR*timeStepHour;
         double batteryCap = bC;
         double maxChargeRate = mCR*timeStepHour;
-       // double headProvision = cCount *loadLevel*maxChargePointRate;
 
         Map<Integer,Double> gridLoad = importGridLoad(gridLoadFilename, 25, 2);
 		Random.seed = this.seed;
@@ -138,6 +137,7 @@ public class EvSimulation extends InjectedSimulation implements TimeDriven {
         session.setGlobal("gridLoad", gridLoad);
         session.setGlobal("loadLevel", loadLevel);
         session.setGlobal("usageSteepness", usageSteepness);
+        session.setGlobal("useMinimumPool", useMinimumPool);
         session.setGlobal("maxChargePointRate", maxChargePointRate);
 
         Allocation clusterAlloc = Allocation.RANDOM;
@@ -148,41 +148,44 @@ public class EvSimulation extends InjectedSimulation implements TimeDriven {
 			}
 		}
 
-
-
-
-
         Cluster c = new Cluster(0, clusterAlloc, maxChargePointRate);
         session.insert(c);
+
+        RandomEngine engine = new MersenneTwister64(seed);
+        Normal normal = new Normal(0, 2, engine);
 
 		for (int n = 0; n < agentCount; n++) {
 			UUID pid = Random.randomUUID();
             //time starts at 12:00pm, so round 1 is at 12:00, arrive home 18+-N(0,2)
             int arrivalRound = (int) (6/timeStepHour) + (int) Math.round((1/timeStepHour) * normal.nextDouble());
-            //depart from 8 randomly, or
+            //depart from home at 8+-N(0,2)
             int evDepartureRound = (int) (20/timeStepHour) + (int) Math.round((1/timeStepHour) * normal.nextDouble());
             //initial capacity random from minSOC% to maxSOC%
             double initialCapacity =  batteryCap*maxSOC - Random.randomDouble() * (batteryCap * (maxSOC-minSOC));
 
-
-/*            double totalDemand = Math.max(batteryCap - initialCapacity, 0);
-            double roundDemand = Math.min(totalDemand,
-                    Math.min(maxChargePointRate, maxChargeRate)
-            );
-            double totalDemandInTurns = Math.ceil(totalDemand / Math.min(maxChargePointRate, maxChargeRate));
-             int chargingDeadline = (int) (evDepartureRound - totalDemandInTurns);
-
-            arrivalRound += (int) ((chargingDeadline - arrivalRound) * Random.randomDouble());*/
-
+            if (randomChargingStart)   {
+                double totalDemand = Math.max(batteryCap - initialCapacity, 0);
+                double roundDemand = Math.min(totalDemand,
+                        Math.min(maxChargePointRate, maxChargeRate)
+                );
+                double totalDemandInTurns = Math.ceil(totalDemand / Math.min(maxChargePointRate, maxChargeRate));
+                 int chargingDeadline = (int) (evDepartureRound - totalDemandInTurns);
+                //postpone charging randomly until charging deadline, implemented as postponing arrival
+                arrivalRound += (int) ((chargingDeadline - arrivalRound) * Random.randomDouble());
+            }
 
 			s.addParticipant(new EvPlayer(pid, "c" + n, evDepartureRound));
 			Player p = new Player(pid, "c" + n, "C", batteryCap, initialCapacity, maxChargeRate, arrivalRound, c);
 			players.add(p);
 			session.insert(p);
+
+          /*  UUID pid2 = Random.randomUUID();
+            s.addParticipant(new GenPlayer(pid2, "g" + n));
+            Player p2 = new Player(pid2, "g" + n, "C", 0, 0, maxChargeRate/2, 1, c);
+            players.add(p2);
+            session.insert(p2);*/
 		}
 	}
-
-
 
 	@Override
 	public void incrementTime() {

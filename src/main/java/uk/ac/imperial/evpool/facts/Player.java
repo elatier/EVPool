@@ -10,8 +10,6 @@ public class Player {
 	UUID id;
 	final String name;
 	String type = "C";
-	//double g = 0;
-	//double q = 0;
     double batteryCap = 0;   //  full charge capacity
     double chargeLevel = 0;  // current charge level (units of charge)
 	double maxChargeRate = 0;  //max charge rate for battery per timestep
@@ -29,7 +27,6 @@ public class Player {
 	double appropriated = 0;
 	Role role = Role.PROSUMER;
 
-	Map<Cluster, PlayerHistory> history = new HashMap<Cluster, PlayerHistory>();
     int arrivalRound = 0;
 
     public Cluster getCluster() {
@@ -150,10 +147,6 @@ public class Player {
 
 	public void setRole(Role role) {
 		this.role = role;
-	}
-
-	public Map<Cluster, PlayerHistory> getHistory() {
-		return history;
 	}
 
 	@Override

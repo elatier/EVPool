@@ -14,8 +14,9 @@ global Map<Integer,Double> gridLoad
 global Double maxChargePointRate
 global Double loadLevel
 global Double usageSteepness
+global Boolean useMinimumPool
 
-rule "Resource allocation"
+rule "Resource provision and allocation"
 	no-loop
 	when
 		$r : Round( type == RoundType.DEMAND, $t : number )
@@ -24,21 +25,27 @@ rule "Resource allocation"
 		$pool : ProvisionPool( cluster == $c )
 		$mPool : MinimumPool( cluster == $c )
 		$maxPool : MaximumPool( cluster == $c )
-		$poolMembers : List(size >= 0) from accumulate( MemberOf( cluster == $c, $p : player ), collectList( $p ) )
+		$poolMembers : List(size >= 0) from
+		    accumulate( MemberOf( cluster == $c, $p : player ), collectList( $p ) )
 	then
         double roundGridLoad = (Double) gridLoad.get($t);
         double loadMax = (Double) gridLoad.get(-1);
         double loadMin = (Double) gridLoad.get(-2);
-        double fractionOfMaxLoad = Math.pow((1.0 -((roundGridLoad - loadMin)/(loadMax-loadMin))),usageSteepness);
+        double fractionOfMaxLoad =
+            Math.pow((1.0 -((roundGridLoad - loadMin)/(loadMax-loadMin))),usageSteepness);
 
         Double ePool = 0.0; //external pool
-		Double headProvision = $poolMembers.size() * maxChargePointRate*loadLevel * fractionOfMaxLoad;
+		Double headProvision = $poolMembers.size() *
+		    maxChargePointRate*loadLevel * fractionOfMaxLoad;
+
 		if (headProvision > $maxPool.getQuantity()) {
 		    headProvision =  $maxPool.getQuantity();
 		};
-/*        if (headProvision < $mPool.getQuantity()) {
-            headProvision =  $mPool.getQuantity();
-        };*/
+		if (useMinimumPool) {
+            if (headProvision < $mPool.getQuantity()) {
+                headProvision =  $mPool.getQuantity();
+            }
+        };
          ePool = headProvision - $pool.getQuantity();
          logger.info("HeadProvision: "+headProvision+", Adding from outside grid:" +ePool);
 
