@@ -1,1 +1,0 @@
-0    [uk.ac.imperial.presage2.core.cli.Presage2CLI.main()] INFO  uk.ac.imperial.presage2.core.db.DatabaseModule  - Using database settings from db.properties.
