@@ -46,7 +46,9 @@ rule "Resource provision and allocation"
                 headProvision =  $mPool.getQuantity();
             }
         };
-         ePool = headProvision - $pool.getQuantity();
+        if (headProvision > $pool.getQuantity()) {
+            ePool = headProvision - $pool.getQuantity();
+        };
          logger.info("HeadProvision: "+headProvision+", Adding from outside grid:" +ePool);
 
         modify( $aPool ) {

@@ -178,12 +178,13 @@ public class EvSimulation extends InjectedSimulation implements TimeDriven {
 			Player p = new Player(pid, "c" + n, "C", batteryCap, initialCapacity, maxChargeRate, arrivalRound, c);
 			players.add(p);
 			session.insert(p);
-
-          /*  UUID pid2 = Random.randomUUID();
+        }
+        for (int n = 0; n < 1; n++) {
+            UUID pid2 = Random.randomUUID();
             s.addParticipant(new GenPlayer(pid2, "g" + n));
-            Player p2 = new Player(pid2, "g" + n, "C", 0, 0, maxChargeRate/2, 1, c);
+            Player p2 = new Player(pid2, "g" + n, "C", 0, 0, maxChargePointRate*10, 1, c);
             players.add(p2);
-            session.insert(p2);*/
+            session.insert(p2);
 		}
 	}
 

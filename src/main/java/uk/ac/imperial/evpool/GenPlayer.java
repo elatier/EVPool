@@ -7,7 +7,6 @@ import uk.ac.imperial.evpool.actions.LeaveCluster;
 import uk.ac.imperial.evpool.actions.Provision;
 import uk.ac.imperial.evpool.facts.Cluster;
 import uk.ac.imperial.evpool.facts.Role;
-import uk.ac.imperial.presage2.core.db.persistent.TransientAgentState;
 import uk.ac.imperial.presage2.core.environment.ActionHandlingException;
 import uk.ac.imperial.presage2.core.environment.ParticipantSharedState;
 import uk.ac.imperial.presage2.core.environment.UnavailableServiceException;
@@ -79,7 +78,7 @@ public class GenPlayer extends AbstractParticipant {
             //batteryCap = game.getBatteryCap(getID());
             double maxChargeRate = game.getMaxChargeRate(getID());
             //maxChargePointRate = cluster.getChargePointRate();
-             provision(maxChargeRate* Random.randomDouble());
+             provision(maxChargeRate*Random.randomDouble());
             //chargeLevel = game.getChargeLevel(getID());
 
             if (game.getRole(getID()) == Role.HEAD) {
